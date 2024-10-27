@@ -1,0 +1,8 @@
+export enum EnumTypeProduct {
+  PIZZA="PIZZA",
+  DRINKS="DRINKS",
+  SNACKS="SNACKS",
+  DESSERTS="DESSERTS",
+  COMBO="COMBO",
+  SAUCES="SAUCES",
+}

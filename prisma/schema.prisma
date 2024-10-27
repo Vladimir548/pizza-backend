@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int               @id @default(autoincrement())
+  fullName         String?
+  email            String            @unique
+  password         String?
+  role             UserRole?         @default(USER)
+  verified         DateTime?
+  provider         String?
+  providerId       String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  cart             Cart?
+  orders           Order[]
+  verificationCode VerificationCode?
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+}
+
+model Product {
+  id             Int              @id @default(autoincrement())
+  name           String
+  categoryId     Int
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  typeProduct    TypeProduct
+  image          String
+  category       Category         @relation(fields: [categoryId], references: [id])
+  productVariant ProductVariant[]
+  ingredients    Ingredient[]     @relation("IngredientToProduct")
+  CartItem       CartItem[]
+}
+
+model ProductVariant {
+  id          Int         @id @default(autoincrement())
+  parameter   Parameters? @relation(fields: [parameterId], references: [id])
+  parameterId Int?
+  quantity    Int?
+  productId   Int
+  cartItems   CartItem[]
+  image       String
+  doughName   TypeDough?
+  product     Product     @relation(fields: [productId], references: [id])
+  sizes       Sizes[]
+}
+
+model Parameters {
+  id             Int              @id @default(autoincrement())
+  parameter      String
+  typeProduct    TypeProduct[]
+  ProductVariant ProductVariant[]
+}
+
+model Sizes {
+  id               Int            @id @default(autoincrement())
+  size             String
+  price            Int
+  weight           Int?
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  productVariantId Int
+  CartItem         CartItem[]
+}
+
+// model PizzaTypeDough {
+//   id               Int            @id @default(autoincrement())
+
+//   size             PizzaSize[]
+
+//   productVariants  ProductVariant @relation(fields: [productVariantId], references: [id])
+//   productVariantId Int
+// }
+
+model Ingredient {
+  id          Int           @id @default(autoincrement())
+  name        String
+  price       Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  image       String
+  typeProduct TypeProduct[]
+  cartItems   CartItem[]    @relation("CartItemToIngredient")
+  products    Product[]     @relation("IngredientToProduct")
+}
+
+model Cart {
+  id          Int        @id @default(autoincrement())
+  userId      Int        @unique
+  totalAmount Int        @default(0)
+  amountGoods Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id])
+  items       CartItem[]
+}
+
+model CartItem {
+  id               Int            @id @default(autoincrement())
+  cartId           Int
+  productVariantId Int
+  productId        Int
+  sizeId           Int
+  quantity         Int            @default(1)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  cart             Cart           @relation(fields: [cartId], references: [id])
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  product          Product        @relation(fields: [productId], references: [id])
+  size             Sizes          @relation(fields: [sizeId], references: [id])
+
+  ingredients Ingredient[] @relation("CartItemToIngredient")
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  totalAmount Int
+  status      OrderStatus @default(PENDING)
+  paymentId   String?
+  items       Json
+  firstName   String
+  lastName    String?
+  email       String
+  phone       String
+  address     String
+  comment     String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id])
+}
+
+model VerificationCode {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  code      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, code])
+}
+
+model Story {
+  id           Int         @id @default(autoincrement())
+  createdAt    DateTime    @default(now())
+  previewImage String
+  items        StoryItem[]
+}
+
+model StoryItem {
+  id        Int      @id @default(autoincrement())
+  storyId   Int
+  createdAt DateTime @default(now())
+  source    String
+  story     Story    @relation(fields: [storyId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  SUCCEEDED
+  CANCELLED
+}
+
+enum TypeProduct {
+  PIZZA
+  DRINKS
+  SNACKS
+  DESSERTS
+  COMBO
+  SAUCES
+}
+
+enum TypeDough {
+  TRADITIONAL
+  THIN
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
