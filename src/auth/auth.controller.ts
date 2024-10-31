@@ -37,7 +37,6 @@ export class AuthController {
 		@Res({ passthrough: true }) res: Response
 	) {
 		const getCartId = await this.cartService.findOne(userId)
-		console.log(getCartId)
 		return await this.authService.generateTokens(userId, res,getCartId.id)
 	}
 

@@ -14,9 +14,10 @@ import { ConfigModule } from '@nestjs/config';
 import { CartModule } from './cart/cart.module';
 import { CartItemModule } from './cart-item/cart-item.module';
 import { OrderModule } from './order/order.module';
+import { ProportionModule } from './proportion/proportion.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal:true}),CategoryModule, IngredientModule, ProductModule, ProductVariantModule, PizzaTypeModule, ParameterModule, UsersModule, AuthModule, CartModule, CartItemModule, OrderModule],
+  imports: [ConfigModule.forRoot({isGlobal:true}),CategoryModule, IngredientModule, ProductModule, ProductVariantModule, PizzaTypeModule, ParameterModule, UsersModule, AuthModule, CartModule, CartItemModule, OrderModule, ProportionModule],
   controllers: [AppController],
   providers: [AppService],
 })

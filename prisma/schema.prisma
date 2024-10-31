@@ -39,21 +39,21 @@ model Product {
   updatedAt      DateTime         @updatedAt
   typeProduct    TypeProduct
   image          String
+  CartItem       CartItem[]
   category       Category         @relation(fields: [categoryId], references: [id])
   productVariant ProductVariant[]
   ingredients    Ingredient[]     @relation("IngredientToProduct")
-  CartItem       CartItem[]
 }
 
 model ProductVariant {
   id          Int         @id @default(autoincrement())
-  parameter   Parameters? @relation(fields: [parameterId], references: [id])
   parameterId Int?
   quantity    Int?
   productId   Int
-  cartItems   CartItem[]
   image       String
   doughName   TypeDough?
+  cartItems   CartItem[]
+  parameter   Parameters? @relation(fields: [parameterId], references: [id])
   product     Product     @relation(fields: [productId], references: [id])
   sizes       Sizes[]
 }
@@ -65,24 +65,21 @@ model Parameters {
   ProductVariant ProductVariant[]
 }
 
+model Proportions {
+  id          Int           @id @default(autoincrement())
+  proportion  String
+  typeProduct TypeProduct[]
+}
+
 model Sizes {
   id               Int            @id @default(autoincrement())
   size             String
   price            Int
   weight           Int?
-  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
   productVariantId Int
   CartItem         CartItem[]
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
 }
-
-// model PizzaTypeDough {
-//   id               Int            @id @default(autoincrement())
-
-//   size             PizzaSize[]
-
-//   productVariants  ProductVariant @relation(fields: [productVariantId], references: [id])
-//   productVariantId Int
-// }
 
 model Ingredient {
   id          Int           @id @default(autoincrement())
@@ -100,9 +97,9 @@ model Cart {
   id          Int        @id @default(autoincrement())
   userId      Int        @unique
   totalAmount Int        @default(0)
-  amountGoods Int        @default(0)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  amountGoods Int        @default(0)
   user        User       @relation(fields: [userId], references: [id])
   items       CartItem[]
 }
@@ -117,11 +114,10 @@ model CartItem {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   cart             Cart           @relation(fields: [cartId], references: [id])
-  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
   product          Product        @relation(fields: [productId], references: [id])
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
   size             Sizes          @relation(fields: [sizeId], references: [id])
-
-  ingredients Ingredient[] @relation("CartItemToIngredient")
+  ingredients      Ingredient[]   @relation("CartItemToIngredient")
 }
 
 model Order {
@@ -130,15 +126,15 @@ model Order {
   totalAmount Int
   status      OrderStatus @default(PENDING)
   paymentId   String?
-  items       Json
-  firstName   String
-  lastName    String?
   email       String
   phone       String
   address     String
   comment     String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  firstName   String
+  lastName    String?
+  items       Json
   user        User        @relation(fields: [userId], references: [id])
 }
 

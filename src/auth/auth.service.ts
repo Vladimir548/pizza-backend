@@ -67,11 +67,7 @@ export class AuthService {
 		const currentDate = new Date()
 		const expiresRefresh = new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000)
 		const expiresAccess =  new Date(currentDate.getTime() + 1 * 60 * 60 * 1000)
-
-		// const expiresRefresh =ms(this.configService.get('JWT_REFRESH_EXPIRES'))  
-		// const expiresAccess =ms(this.configService.get('JWT_ACCESS_EXPIRES'))  
-		console.log('refresh',expiresRefresh)
-		console.log('access',expiresRefresh)
+		
 		res.cookie("refreshToken", refreshToken, {
 			httpOnly: true,
 			secure: true,
