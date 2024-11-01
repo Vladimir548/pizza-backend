@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, Query } from '@nestjs/common';
 import { ProportionService } from './proportion.service';
 import { ProportionDto } from './dto/proportion.dto';
 import { UpdateProportionDto } from './dto/update-proportion.dto';
+import { TypeProduct } from '@prisma/client';
 
 @Controller('proportion')
 export class ProportionController {
@@ -16,10 +17,10 @@ export class ProportionController {
   findAll() {
     return this.proportionService.findAll();
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.proportionService.findOne(+id);
+  @HttpCode(200)
+  @Get('by-type')
+  findOne(@Query('type') type: TypeProduct) {
+    return this.proportionService.byType(type);
   }
 
   @Patch(':id')

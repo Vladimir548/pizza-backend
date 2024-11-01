@@ -17,16 +17,15 @@ export class ProductVariantService {
 						image: dto.image,
 						sizes: {
 								create: dto.sizes?.map(size => ({
-										size: size.size,
-										price: +size.price,
-										weight:+size.weight
+										price: Number(size.price),
+										weight:Number(size.weight),
+										sizeId:Number(size.size)
 								})),
 						},
 				},
 		});
 
 		return createdVariant;
-
   }
 
   findAll() {

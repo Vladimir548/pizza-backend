@@ -67,13 +67,15 @@ model Parameters {
 
 model Proportions {
   id          Int           @id @default(autoincrement())
-  proportion  String
+  proportion  String        @unique
   typeProduct TypeProduct[]
+  sizes       Sizes[]
 }
 
 model Sizes {
   id               Int            @id @default(autoincrement())
-  size             String
+  size             Proportions     @relation(fields: [sizeId], references: [id])
+  sizeId            Int
   price            Int
   weight           Int?
   productVariantId Int

@@ -1,10 +1,9 @@
 
-import {  TypeDough } from '@prisma/client';
+import {  Proportions, TypeDough } from '@prisma/client';
 import { IsArray, IsEnum, IsInt, IsNumber, IsOptional, IsString  } from 'class-validator';
 class SizesDto {
-	@IsArray()
-	@IsString()
-	size:string
+	@IsNumber()
+	size:Proportions
 	@IsNumber()
 	productVariantId:number;  
 	@IsNumber()
