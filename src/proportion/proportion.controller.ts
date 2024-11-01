@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, Query } fr
 import { ProportionService } from './proportion.service';
 import { ProportionDto } from './dto/proportion.dto';
 import { UpdateProportionDto } from './dto/update-proportion.dto';
-import { TypeProduct } from '@prisma/client';
+
 
 @Controller('proportion')
 export class ProportionController {
@@ -19,8 +19,8 @@ export class ProportionController {
   }
   @HttpCode(200)
   @Get('by-type')
-  findOne(@Query('type') type: TypeProduct) {
-    return this.proportionService.byType(type);
+  findOne(@Query('type') type: number) {
+    return this.proportionService.byType(Number(type));
   }
 
   @Patch(':id')

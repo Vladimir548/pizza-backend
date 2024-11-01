@@ -1,23 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { IngredientDto } from './dto/ingredient.dto';
 import { PrismaService } from 'src/prisma.service';
-import { EnumTypeProduct } from 'src/enums/ETypeProduct';
+
 
 
 @Injectable()
 export class IngredientService {
 	constructor (private prisma :PrismaService){}
   create(dto: IngredientDto) {
-		const typeProductArray = (typeof dto.typeProduct === 'string'
-			? dto.typeProduct.split(',')
-			: dto.typeProduct
-	).map((type: string) => EnumTypeProduct[type as keyof typeof EnumTypeProduct]);
     return this.prisma.ingredient.create({
 			data: {
 					name:dto.name,
 					price:+dto.price,
 					image:dto.image,
-					typeProduct: typeProductArray,
+					categories:{
+						connect:dto.categories
+					}
 			},
 	})
   }
@@ -25,11 +23,13 @@ export class IngredientService {
   findAll() {
     return this.prisma.ingredient.findMany();
   }
-	findByType(type:EnumTypeProduct) {
+	findByType(type:number) {
     return this.prisma.ingredient.findMany({
 			where:{
-				typeProduct:{
-					has:type
+				categories:{
+					some:{
+						id:type
+					}
 				}
 			}
 		});

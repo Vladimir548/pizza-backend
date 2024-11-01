@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ParameterDto } from './dto/parameter.dto';
 
 import { PrismaService } from 'src/prisma.service';
-import { EnumTypeProduct } from 'src/enums/ETypeProduct';
+import { Category } from '@prisma/client';
 
 
 @Injectable()
@@ -12,7 +12,9 @@ export class ParameterService {
     return this.prisma.parameters.create({
 			data:{
 				parameter:dto.parameter,
-				typeProduct:dto.typeProduct
+				categories:{
+					connect:dto.categories
+				}
 			}
 		});
   }
@@ -20,11 +22,13 @@ export class ParameterService {
   findAll() {
     return this.prisma.parameters.findMany();
   }
-	findByType(type:EnumTypeProduct) {
+	findByType(type:number) {
     return this.prisma.parameters.findMany({
 			where:{
-				typeProduct:{
-					has:type
+				categories:{
+					some:{
+						id:type
+					}
 				}
 			}
 		});

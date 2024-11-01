@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, Query } from '@nestjs/common';
 import { ParameterService } from './parameter.service';
 import { ParameterDto } from './dto/parameter.dto';
-import { EnumTypeProduct } from 'src/enums/ETypeProduct';
 
 
 @Controller('parameter')
@@ -19,7 +18,7 @@ export class ParameterController {
   }
 	@HttpCode(200)
   @Get('by-type')
-  findByType(@Query('type') type:EnumTypeProduct) {
+  findByType(@Query('type') type:number) {
     return this.parameterService.findByType(type);
   }
 

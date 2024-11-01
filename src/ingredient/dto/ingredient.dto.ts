@@ -1,6 +1,6 @@
-import { TypeProduct } from '@prisma/client';
-import { IsString,  IsNumber,IsEnum, IsArray } from 'class-validator'
-import { EnumTypeProduct } from 'src/enums/ETypeProduct';
+
+import { Category } from '@prisma/client';
+import { IsString,  IsNumber, IsArray } from 'class-validator'
 
 export class IngredientDto {
 	@IsString()
@@ -11,7 +11,7 @@ export class IngredientDto {
 
   @IsString()
   image: string;
+
 	@IsArray()
-	@IsEnum(TypeProduct,{ each: true })
-	typeProduct:TypeProduct
+	categories:Category[]
 }

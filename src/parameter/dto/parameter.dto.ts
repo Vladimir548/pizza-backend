@@ -1,9 +1,10 @@
-import { IsString,IsEnum } from "class-validator";
-import { EnumTypeProduct } from "src/enums/ETypeProduct";
+import { Category } from "@prisma/client";
+import { IsString, IsArray } from "class-validator";
+
 
 export class ParameterDto {
 	@IsString()
 	parameter:string
-	@IsEnum(EnumTypeProduct)
-	typeProduct:EnumTypeProduct[]
+	@IsArray()
+	categories:Category[]
 }

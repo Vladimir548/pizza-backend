@@ -24,23 +24,24 @@ model User {
 }
 
 model Category {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  products  Product[]
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  products    Product[]     @relation("ProductCategories")
+  parameters  Parameters[]  @relation("CategoryParameters")
+  proportions Proportions[] @relation("CategoryProportions")
+  ingredients Ingredient[]  @relation("CategoryIngredients")
 }
 
 model Product {
   id             Int              @id @default(autoincrement())
   name           String
-  categoryId     Int
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  typeProduct    TypeProduct
   image          String
   CartItem       CartItem[]
-  category       Category         @relation(fields: [categoryId], references: [id])
+  categories     Category[]       @relation("ProductCategories")
   productVariant ProductVariant[]
   ingredients    Ingredient[]     @relation("IngredientToProduct")
 }
@@ -61,21 +62,21 @@ model ProductVariant {
 model Parameters {
   id             Int              @id @default(autoincrement())
   parameter      String
-  typeProduct    TypeProduct[]
+  categories     Category[]       @relation("CategoryParameters")
   ProductVariant ProductVariant[]
 }
 
 model Proportions {
-  id          Int           @id @default(autoincrement())
-  proportion  String        @unique
-  typeProduct TypeProduct[]
-  sizes       Sizes[]
+  id         Int        @id @default(autoincrement())
+  proportion String     @unique
+  categories Category[] @relation("CategoryProportions")
+  sizes      Sizes[]
 }
 
 model Sizes {
   id               Int            @id @default(autoincrement())
-  size             Proportions     @relation(fields: [sizeId], references: [id])
-  sizeId            Int
+  size             Proportions    @relation(fields: [sizeId], references: [id])
+  sizeId           Int
   price            Int
   weight           Int?
   productVariantId Int
@@ -84,15 +85,15 @@ model Sizes {
 }
 
 model Ingredient {
-  id          Int           @id @default(autoincrement())
-  name        String
-  price       Int
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  image       String
-  typeProduct TypeProduct[]
-  cartItems   CartItem[]    @relation("CartItemToIngredient")
-  products    Product[]     @relation("IngredientToProduct")
+  id         Int        @id @default(autoincrement())
+  name       String
+  price      Int
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  image      String
+  categories Category[] @relation("CategoryIngredients")
+  cartItems  CartItem[] @relation("CartItemToIngredient")
+  products   Product[]  @relation("IngredientToProduct")
 }
 
 model Cart {
@@ -169,15 +170,6 @@ enum OrderStatus {
   PENDING
   SUCCEEDED
   CANCELLED
-}
-
-enum TypeProduct {
-  PIZZA
-  DRINKS
-  SNACKS
-  DESSERTS
-  COMBO
-  SAUCES
 }
 
 enum TypeDough {

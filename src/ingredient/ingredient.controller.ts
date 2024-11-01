@@ -36,7 +36,7 @@ export class IngredientController {
   }
 	@HttpCode(200)
   @Get('by-type')
-  findByType(@Query('type') type:EnumTypeProduct) {
+  findByType(@Query('type') type:number) {
     return this.ingredientService.findByType(type);
   }
 

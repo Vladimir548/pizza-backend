@@ -1,5 +1,5 @@
-import { TypeProduct } from '@prisma/client';
+import { Category } from '@prisma/client';
 export class ProportionDto {
 	proportion:string
-	typeProduct:TypeProduct[]
+	categories:Category[]
 }

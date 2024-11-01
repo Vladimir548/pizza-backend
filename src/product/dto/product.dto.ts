@@ -1,4 +1,5 @@
-import { IsString,  IsOptional,IsInt,IsArray, IsEnum } from 'class-validator'
+import { Category } from '@prisma/client';
+import { IsString,  IsOptional,IsInt,IsArray, IsEnum, IsNumber } from 'class-validator'
 export enum StatusOrder {
   TRADITIONAL = "TRADITIONAL",
   THIN = "THIN",
@@ -21,10 +22,8 @@ export class ProductDto {
 	@IsOptional()
   @IsString()
   description?: string;
-  @IsInt()
-  categoryId: number;
-	@IsEnum(TypeProduct)
-	typeProduct:TypeProduct
+	@IsArray()
+  categories: Category[];
 	@IsOptional()
 	@IsArray()
   ingredientIds: number[];
