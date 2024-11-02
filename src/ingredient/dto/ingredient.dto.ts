@@ -1,6 +1,6 @@
 
 import { Category } from '@prisma/client';
-import { IsString,  IsNumber, IsArray } from 'class-validator'
+import { IsString,  IsNumber, IsArray, IsInt } from 'class-validator'
 
 export class IngredientDto {
 	@IsString()
@@ -13,5 +13,6 @@ export class IngredientDto {
   image: string;
 
 	@IsArray()
-	categories:Category[]
+  @IsInt({ each: true })
+	categories:number[]
 }

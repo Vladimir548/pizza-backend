@@ -8,13 +8,14 @@ import { PrismaService } from 'src/prisma.service';
 export class IngredientService {
 	constructor (private prisma :PrismaService){}
   create(dto: IngredientDto) {
+	
     return this.prisma.ingredient.create({
 			data: {
 					name:dto.name,
 					price:+dto.price,
 					image:dto.image,
 					categories:{
-						connect:dto.categories
+						connect:JSON.parse(String(dto.categories)).map((id: number) => ({ id }))
 					}
 			},
 	})
@@ -23,17 +24,18 @@ export class IngredientService {
   findAll() {
     return this.prisma.ingredient.findMany();
   }
+
 	findByType(type:number) {
-    return this.prisma.ingredient.findMany({
+    	return this.prisma.ingredient.findMany({
 			where:{
 				categories:{
 					some:{
-						id:type
+						id:Number(type)
 					}
 				}
 			}
 		});
-  }
+  	}
  async priceByIds(ids: number[]) {
 		const ingredients = await this.prisma.ingredient.findMany({
 			where:{
