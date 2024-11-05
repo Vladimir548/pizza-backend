@@ -26,6 +26,7 @@ model User {
 model Category {
   id          Int           @id @default(autoincrement())
   name        String        @unique
+  value       String        @unique
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   parameters  Parameters[]  @relation("CategoryParameters")

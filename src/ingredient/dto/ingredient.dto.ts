@@ -1,5 +1,4 @@
 
-import { Category } from '@prisma/client';
 import { IsString,  IsNumber, IsArray, IsInt } from 'class-validator'
 
 export class IngredientDto {
