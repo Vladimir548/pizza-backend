@@ -16,7 +16,8 @@ enum TypeProduct {
 export class ProductDto {
 	@IsString()
   name: string;
-
+	@IsEnum(TypeProduct)
+	type:TypeProduct
   @IsString()
   image: string;
 	@IsOptional()

@@ -4,5 +4,5 @@ export class CategoryDto {
 	@IsString()
   name: string;
   @IsString()
-  value: string;
+  slug: string;
 }

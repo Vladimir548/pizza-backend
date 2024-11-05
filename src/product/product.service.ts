@@ -14,6 +14,7 @@ export class ProductService {
 				name:dto.name,
 				categoryId:Number(dto.categoryId),
 				image:dto.image,
+				type:dto.type,
 				ingredients:{
 					connect:ingredients?.map(id => ({id}))
 				}
