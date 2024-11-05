@@ -28,10 +28,10 @@ model Category {
   name        String        @unique
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  products    Product[]     @relation("ProductCategories")
   parameters  Parameters[]  @relation("CategoryParameters")
   proportions Proportions[] @relation("CategoryProportions")
   ingredients Ingredient[]  @relation("CategoryIngredients")
+  products    Product[]
 }
 
 model Product {
@@ -41,7 +41,8 @@ model Product {
   updatedAt      DateTime         @updatedAt
   image          String
   CartItem       CartItem[]
-  categories     Category[]       @relation("ProductCategories")
+  category       Category         @relation(fields: [categoryId], references: [id])
+  categoryId     Int
   productVariant ProductVariant[]
   ingredients    Ingredient[]     @relation("IngredientToProduct")
 }
@@ -68,14 +69,14 @@ model Parameters {
 
 model Proportions {
   id         Int        @id @default(autoincrement())
-  proportion String     @unique
+  value      String     @unique
   categories Category[] @relation("CategoryProportions")
   sizes      Sizes[]
 }
 
 model Sizes {
   id               Int            @id @default(autoincrement())
-  size             Proportions    @relation(fields: [sizeId], references: [id])
+  proportion       Proportions    @relation(fields: [sizeId], references: [id])
   sizeId           Int
   price            Int
   weight           Int?

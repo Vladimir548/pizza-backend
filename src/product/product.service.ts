@@ -12,9 +12,7 @@ export class ProductService {
     return this.prisma.product.create({
 			data:{
 				name:dto.name,
-				categories:{
-					connect:dto.categories
-				},
+				categoryId:Number(dto.categoryId),
 				image:dto.image,
 				ingredients:{
 					connect:ingredients?.map(id => ({id}))
@@ -56,17 +54,17 @@ async	findMaxPrice() {
   findByCategory(id: number) {
     return this.prisma.product.findMany({
 			where:{
-				categories:{
-					some:{
-						id:id
-					}
-				}
+				categoryId:Number(id)
 			},
 			include:{
-				categories:true,
+				category:true,
 				productVariant:{
 					include:{
-						sizes:true,
+						sizes:{
+							include:{
+								proportion:true
+							}
+						},
 					}
 				},
 				ingredients:true
@@ -104,7 +102,8 @@ return  this.prisma.product.findFirst({
 						sizes:true,
 					}
 				},
-				ingredients:true
+				ingredients:true,
+				category:true
 			},
 			
 		});

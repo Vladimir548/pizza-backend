@@ -12,9 +12,9 @@ export class ProportionService {
  async create(dto: ProportionDto) {
     return await this.prisma.proportions.create({
 			data:{
-				proportion:dto.proportion,
+				value:dto.value,
 				categories:{
-						connect:dto.categories
+						connect:dto.categories.map(id => ({id}))
 				}
 			}
 		})
@@ -32,7 +32,10 @@ export class ProportionService {
 						id:type
 					}
         }
-      }
+      },
+			orderBy:{
+				value:'asc'
+			}
     });
   }
 

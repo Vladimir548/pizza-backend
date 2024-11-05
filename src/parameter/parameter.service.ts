@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ParameterDto } from './dto/parameter.dto';
 
 import { PrismaService } from 'src/prisma.service';
-import { Category } from '@prisma/client';
 
 
 @Injectable()
@@ -13,7 +12,7 @@ export class ParameterService {
 			data:{
 				parameter:dto.parameter,
 				categories:{
-					connect:dto.categories
+					connect:dto.categories.map((id:number) =>({id}) )
 				}
 			}
 		});

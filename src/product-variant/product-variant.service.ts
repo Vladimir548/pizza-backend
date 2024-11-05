@@ -8,6 +8,7 @@ import { PrismaService } from 'src/prisma.service';
 export class ProductVariantService {
 	constructor (private prisma :PrismaService){}
 	async create(dto: ProductVariantDto) {
+		console.log(dto)
 		const createdVariant = await this.prisma.productVariant.create({
 				data: {
 						productId: +dto.productId,
@@ -19,7 +20,7 @@ export class ProductVariantService {
 								create: dto.sizes?.map(size => ({
 										price: Number(size.price),
 										weight:Number(size.weight),
-										sizeId:Number(size.size)
+										sizeId:Number(size.sizeId)
 								})),
 						},
 				},

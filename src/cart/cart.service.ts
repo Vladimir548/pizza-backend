@@ -31,7 +31,11 @@ export class CartService {
 						ingredients:true,
 						product:true,
 						productVariant:true,
-						size:true
+						size:{
+							include:{
+								proportion:true
+							}
+						}
 					}
 				},
 				_count:true
