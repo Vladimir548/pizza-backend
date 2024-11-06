@@ -8,7 +8,6 @@ import { PrismaService } from 'src/prisma.service';
 export class ProductVariantService {
 	constructor (private prisma :PrismaService){}
 	async create(dto: ProductVariantDto) {
-		console.log(dto)
 		const createdVariant = await this.prisma.productVariant.create({
 				data: {
 						productId: +dto.productId,

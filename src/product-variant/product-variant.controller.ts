@@ -20,11 +20,10 @@ export class ProductVariantController {
 	})) file: Express.Multer.File,
   @Body() dto: ProductVariantDto
 ) {
-	console.log(dto)
+
 	if (typeof dto.sizes === 'string') {
 		dto.sizes = JSON.parse(dto.sizes);
 }
-console.log(dto.sizes)
 	dto.image=file.path
   return this.productVariantService.create(dto);
 }

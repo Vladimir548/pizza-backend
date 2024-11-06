@@ -100,7 +100,11 @@ return  this.prisma.product.findFirst({
 				productVariant:{
 					include:{
 						parameter:true,
-						sizes:true,
+						sizes:{
+							include:{
+								proportion:true
+							}
+						},
 					}
 				},
 				ingredients:true,
