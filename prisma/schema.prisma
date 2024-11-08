@@ -41,6 +41,7 @@ model Product {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   image          String
+  descriprion    String?       
   CartItem       CartItem[]
   category       Category         @relation(fields: [categoryId], references: [id])
   categoryId     Int
@@ -81,7 +82,7 @@ model Sizes {
   proportion       Proportions    @relation(fields: [sizeId], references: [id])
   sizeId           Int
   price            Int
-  weight           Int?
+  weight           String?
   productVariantId Int
   CartItem         CartItem[]
   productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])

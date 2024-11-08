@@ -19,8 +19,8 @@ export class ProportionController {
   }
   @HttpCode(200)
   @Get('by-type')
-  findOne(@Query('type') type: number) {
-    return this.proportionService.byType(Number(type));
+  findOne(@Query('categoryId') categoryId: number) {
+    return this.proportionService.byType(Number(categoryId));
   }
 
   @Patch(':id')

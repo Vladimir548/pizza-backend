@@ -6,8 +6,8 @@ class SizesDto {
 	sizeId:Proportions
 	@IsNumber()
 	productVariantId:number;  
-	@IsNumber()
-	weight:number; 
+	@IsString()
+	weight:string; 
 	@IsNumber()
   price: number;
 }

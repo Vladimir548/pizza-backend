@@ -18,7 +18,7 @@ export class ProductVariantService {
 						sizes: {
 								create: dto.sizes?.map(size => ({
 										price: Number(size.price),
-										weight:Number(size.weight),
+										weight:size.weight,
 										sizeId:Number(size.sizeId)
 								})),
 						},

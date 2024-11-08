@@ -24,12 +24,12 @@ export class ProportionService {
     return `This action returns all proportion`;
   }
 
-   async byType(type: number) {
+   async byType(categoryId: number) {
     return await this.prisma.proportions.findMany({
       where:{
         categories:{
           some:{
-						id:type
+						id:categoryId
 					}
         }
       },
