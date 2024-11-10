@@ -18,14 +18,25 @@ export class ProductVariantService {
 						sizes: {
 								create: dto.sizes?.map(size => ({
 										price: Number(size.price),
-										weight:size.weight,
-										sizeId:Number(size.sizeId)
+										weight:String(size.weight),
+										sizeId:Number(size.sizeId),
+										ingredients:{
+											connect:size.ingredients?.map(id => ({id}))
+										}
 								})),
 						},
+						
 				},
 		});
 
-		return createdVariant;
+		const createAttribute = await this.prisma.productAttribute.create({
+			data:{
+				name:dto.attributeName,
+				productVariantId:createdVariant.id
+			}
+		})
+
+		return {createdVariant,createAttribute};
   }
 
   findAll() {

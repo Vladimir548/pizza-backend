@@ -8,16 +8,14 @@ import { PrismaService } from 'src/prisma.service';
 export class ProductService {
 	constructor (private prisma :PrismaService){}
   create(dto: ProductDto) {
-			const ingredients= dto.ingredientIds?.map(Number)
+		
     return this.prisma.product.create({
 			data:{
 				name:dto.name,
 				categoryId:Number(dto.categoryId),
 				image:dto.image,
 				type:dto.type,
-				ingredients:{
-					connect:ingredients?.map(id => ({id}))
-				}
+				
 			}
 		});
   }
@@ -63,12 +61,14 @@ async	findMaxPrice() {
 					include:{
 						sizes:{
 							include:{
-								proportion:true
+								proportion:true,
+								ingredients:true
 							}
 						},
+						
 					}
 				},
-				ingredients:true
+
 			}
 		});
   }
@@ -107,7 +107,7 @@ return  this.prisma.product.findFirst({
 						},
 					}
 				},
-				ingredients:true,
+				
 				category:true
 			},
 			

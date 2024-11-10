@@ -27,6 +27,7 @@ model Category {
   id          Int           @id @default(autoincrement())
   name        String        @unique
   slug        String        @unique
+  type        TypeProduct
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   parameters  Parameters[]  @relation("CategoryParameters")
@@ -41,26 +42,33 @@ model Product {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   image          String
-  descriprion    String?       
+  descriprion    String?
   CartItem       CartItem[]
   category       Category         @relation(fields: [categoryId], references: [id])
   categoryId     Int
   type           TypeProduct
   productVariant ProductVariant[]
-  ingredients    Ingredient[]     @relation("IngredientToProduct")
 }
 
 model ProductVariant {
-  id          Int         @id @default(autoincrement())
-  parameterId Int?
-  quantity    Int?
-  productId   Int
-  image       String
-  doughName   TypeDough?
-  cartItems   CartItem[]
-  parameter   Parameters? @relation(fields: [parameterId], references: [id])
-  product     Product     @relation(fields: [productId], references: [id])
-  sizes       Sizes[]
+  id               Int                @id @default(autoincrement())
+  parameterId      Int?
+  quantity         Int?
+  productId        Int
+  image            String
+  doughName        TypeDough?
+  cartItems        CartItem[]
+  parameter        Parameters?        @relation(fields: [parameterId], references: [id])
+  product          Product            @relation(fields: [productId], references: [id])
+  sizes            Sizes[]
+  productAttribute ProductAttribute[]
+}
+
+model ProductAttribute {
+  id               Int            @id @default(autoincrement())
+  name             String?
+  productVariantId Int
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
 }
 
 model Parameters {
@@ -85,6 +93,7 @@ model Sizes {
   weight           String?
   productVariantId Int
   CartItem         CartItem[]
+  ingredients      Ingredient[]   @relation("IngredientToSizes")
   productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
 }
 
@@ -97,7 +106,7 @@ model Ingredient {
   image      String
   categories Category[] @relation("CategoryIngredients")
   cartItems  CartItem[] @relation("CartItemToIngredient")
-  products   Product[]  @relation("IngredientToProduct")
+  sizes      Sizes[]    @relation("IngredientToSizes")
 }
 
 model Cart {
