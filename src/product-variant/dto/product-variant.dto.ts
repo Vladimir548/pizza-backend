@@ -11,7 +11,7 @@ class SizesDto {
 	@IsNumber()
   price: number;
 	@IsArray()
-  ingredients: number[];
+  ingredientIds: number[];
 }
 
 

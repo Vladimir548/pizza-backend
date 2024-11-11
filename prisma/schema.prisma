@@ -61,13 +61,13 @@ model ProductVariant {
   parameter        Parameters?        @relation(fields: [parameterId], references: [id])
   product          Product            @relation(fields: [productId], references: [id])
   sizes            Sizes[]
-  productAttribute ProductAttribute[]
+  productAttribute ProductAttribute?
 }
 
 model ProductAttribute {
   id               Int            @id @default(autoincrement())
   name             String?
-  productVariantId Int
+  productVariantId Int            @unique
   productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
 }
 

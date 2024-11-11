@@ -1,119 +1,117 @@
-
 import { Injectable } from '@nestjs/common';
 import { ProductDto } from './dto/product.dto';
 import { PrismaService } from 'src/prisma.service';
 
-
 @Injectable()
 export class ProductService {
-	constructor (private prisma :PrismaService){}
+  constructor(private prisma: PrismaService) {}
   create(dto: ProductDto) {
-		
     return this.prisma.product.create({
-			data:{
-				name:dto.name,
-				categoryId:Number(dto.categoryId),
-				image:dto.image,
-				type:dto.type,
-				
-			}
-		});
+      data: {
+        name: dto.name,
+        categoryId: Number(dto.categoryId),
+        image: dto.image,
+        type: dto.type,
+      },
+    });
   }
 
   findAll() {
     return this.prisma.product.findMany({
-			include:{
-				productVariant:{
-					include:{
-						sizes:true,
-					}
-				}
-			}
-		});
+      include: {
+        productVariant: {
+          include: {
+            sizes: true,
+          },
+        },
+      },
+    });
   }
-async	findMaxPrice() {
+  async findMaxPrice() {
     const price = await this.prisma.product.findMany({
-		
-			include:{
-				productVariant:{
-					select:{
-					sizes:{
-						select:{
-							price:true
-						}
-					}
-					}
-				}
-			},
-		});
+      include: {
+        productVariant: {
+          select: {
+            sizes: {
+              select: {
+                price: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-		const mathMax = price?.flatMap(val => val.productVariant.map(val => val.sizes.map(val => val.price)).flat())
-		return Math.max(...mathMax)
+    const mathMax = price?.flatMap((val) =>
+      val.productVariant.map((val) => val.sizes.map((val) => val.price)).flat(),
+    );
+    return Math.max(...mathMax);
   }
   findByCategory(id: number) {
     return this.prisma.product.findMany({
-			where:{
-				categoryId:Number(id)
-			},
-			include:{
-				category:true,
-				productVariant:{
-					include:{
-						sizes:{
-							include:{
-								proportion:true,
-								ingredients:true
-							}
-						},
-						
-					}
-				},
-
-			}
-		});
+      where: {
+        categoryId: Number(id),
+      },
+      include: {
+        category: true,
+        productVariant: {
+          include: {
+            sizes: {
+              include: {
+                proportion: true,
+                ingredients: true,
+              },
+            },
+          },
+        },
+      },
+    });
   }
-	async search (query:string){
-		return  this.prisma.product.findMany({
-			where:{
-				name:{
-						contains:query?.toLowerCase(),
-						mode:'insensitive'
-				},	
-			}
-		})
-		// .then(products => {
-		// 	return  products.reduce((acc, product) => {
-		// 		if (!acc[product.categoryId]) {
-		// 			acc[product.categoryId] = [];
-		// 		}
-		// 		acc[product.categoryId].push(product);
-		// 		return acc;
-		// 	}, {} as Record<string, typeof products>);
-		// });
-	}
+  async search(query: string) {
+    return this.prisma.product.findMany({
+      where: {
+        name: {
+          contains: query?.toLowerCase(),
+          mode: 'insensitive',
+        },
+      },
+    });
+    // .then(products => {
+    // 	return  products.reduce((acc, product) => {
+    // 		if (!acc[product.categoryId]) {
+    // 			acc[product.categoryId] = [];
+    // 		}
+    // 		acc[product.categoryId].push(product);
+    // 		return acc;
+    // 	}, {} as Record<string, typeof products>);
+    // });
+  }
   findId(id: number) {
-return  this.prisma.product.findFirst({
-			where:{
-				id:+id
-			},
-			include:{
-				productVariant:{
-					include:{
-						parameter:true,
-						sizes:{
-							include:{
-								proportion:true
-							}
-						},
-					}
-				},
-				
-				category:true
-			},
-			
-		});
+    return this.prisma.product.findFirst({
+      where: {
+        id: +id,
+      },
+      include: {
+        productVariant: {
+          include: {
+            parameter: true,
+            sizes: {
+              include: {
+                proportion: true,
+				ingredients:true,
+
+              },
+            },
+			productAttribute:true
+          },
+
+        },
+
+        category: true,
+      },
+    });
   }
-	
+
   update(id: number, dto: ProductDto) {
     return `This action updates a #${id} product`;
   }
