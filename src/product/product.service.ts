@@ -27,8 +27,11 @@ export class ProductService {
       },
     });
   }
-  async findMaxPrice() {
+  async findMaxPrice(categoryId:number) {
     const price = await this.prisma.product.findMany({
+      where:{
+        categoryId:Number(categoryId)
+      },
       include: {
         productVariant: {
           select: {
@@ -75,16 +78,15 @@ export class ProductService {
           mode: 'insensitive',
         },
       },
+    }).then(products => {
+    	return  products.reduce((acc, product) => {
+    		if (!acc[product.categoryId]) {
+    			acc[product.categoryId] = [];
+    		}
+    		acc[product.categoryId].push(product);
+    		return acc;
+    	}, {} as Record<string, typeof products>);
     });
-    // .then(products => {
-    // 	return  products.reduce((acc, product) => {
-    // 		if (!acc[product.categoryId]) {
-    // 			acc[product.categoryId] = [];
-    // 		}
-    // 		acc[product.categoryId].push(product);
-    // 		return acc;
-    // 	}, {} as Record<string, typeof products>);
-    // });
   }
   findId(id: number) {
     return this.prisma.product.findFirst({

@@ -32,8 +32,8 @@ export class ProductController {
   }
 	@HttpCode(200)
   @Get('max-price')
-  findMaxPrice() {
-    return this.productService.findMaxPrice();
+  findMaxPrice(@Query('categoryId') categoryId:number) {
+    return this.productService.findMaxPrice(categoryId);
   }
 	@HttpCode(200)
   @Get('category/:id')
