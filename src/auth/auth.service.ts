@@ -1,11 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
-import { RegisterDto } from './dto/register-dto';
-import { hash, verify } from 'argon2';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
-import { CartService } from 'src/cart/cart.service';
+import { BadRequestException, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { JwtService } from '@nestjs/jwt'
+import { hash, verify } from 'argon2'
+import { Response } from 'express'
+import { CartService } from 'src/cart/cart.service'
+import { UsersService } from 'src/users/users.service'
+import { RegisterDto } from './dto/register-dto'
 
 @Injectable()
 export class AuthService {
@@ -25,12 +25,9 @@ export class AuthService {
 			 fullName:fullName,
 			 role:role,
 			 })
-
 			const getCartId = await this.cartService.findOne(createdUser.id)
 		
-				return await this.generateTokens(createdUser.id, res,getCartId.id)
-			
-		
+			return await this.generateTokens(createdUser.id, res,getCartId.id)
   }
 	async googleAuth(email: string,provider:string, res: Response) {
 		const userByEmail = await this.usersService.getOne({ email })

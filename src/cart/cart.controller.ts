@@ -1,5 +1,5 @@
-import { Controller, Get,  Param,  HttpCode } from '@nestjs/common';
-import { CartService } from './cart.service';
+import { Controller, Get, HttpCode, Param } from '@nestjs/common'
+import { CartService } from './cart.service'
 
 
 @Controller('cart')
@@ -13,12 +13,5 @@ export class CartController {
 		
     return this.cartService.byId(id);
   }
-	// @HttpCode(200)
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.cartService.findOne(+id);
-  // }
-
-
 
 }

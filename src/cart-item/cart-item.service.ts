@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CartItemDto } from './dto/cart-item.dto';
-import { PrismaService } from 'src/prisma.service';
-import { CartService } from 'src/cart/cart.service';
-import { IngredientService } from 'src/ingredient/ingredient.service';
+import { BadRequestException, Injectable } from '@nestjs/common'
+import { CartService } from 'src/cart/cart.service'
+import { IngredientService } from 'src/ingredient/ingredient.service'
+import { PrismaService } from 'src/prisma.service'
+import { CartItemDto } from './dto/cart-item.dto'
 
 @Injectable()
 export class CartItemService {
@@ -14,7 +14,7 @@ export class CartItemService {
 
   async create(dto: CartItemDto) {
     const ingredientsArray = dto.ingredientIds?.map(Number);
-
+    console.log(dto)
     const existingItemsIngredients = await this.prisma.cartItem.findMany({
       where: {
         cartId: Number(dto.cartId),

@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common'
 
-import { PrismaService } from 'src/prisma.service';
-import { getDeliveryPrice } from './delivery-price';
+import { PrismaService } from 'src/prisma.service'
+import { getDeliveryPrice } from './delivery-price'
 
 @Injectable()
 export class CartService {
@@ -30,12 +30,17 @@ export class CartService {
 					include:{
 						ingredients:true,
 						product:true,
-						productVariant:true,
+						productVariant:{
+							include:{
+								productAttribute:true,
+							}
+						},
 						size:{
 							include:{
 								proportion:true
 							}
-						}
+						},
+
 					}
 				},
 				_count:true
