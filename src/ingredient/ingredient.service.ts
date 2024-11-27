@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { IngredientDto } from './dto/ingredient.dto';
-import { PrismaService } from 'src/prisma.service';
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from 'src/prisma.service'
+import { IngredientDto } from './dto/ingredient.dto'
 
 
 
@@ -25,15 +25,15 @@ export class IngredientService {
     return this.prisma.ingredient.findMany();
   }
 
-	findByType(type:number) {
-    	return this.prisma.ingredient.findMany({
+	async findByType(type:number) {
+    	return await this.prisma.ingredient.findMany({
 			where:{
 				categories:{
 					some:{
 						id:Number(type)
 					}
 				}
-			}
+			},
 		});
   	}
  async priceByIds(ids: number[]) {

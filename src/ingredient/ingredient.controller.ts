@@ -1,12 +1,22 @@
-import { Controller, Post ,  UseInterceptors,
-  UploadedFile, ParseFilePipe,HttpCode,Param,Get,
-  MaxFileSizeValidator,Body,Patch,Delete, 
-	Query} from '@nestjs/common';
-import { IngredientService } from './ingredient.service';
-import { IngredientDto } from './dto/ingredient.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { fileStorage } from 'src/storage';
-import { EnumTypeProduct } from 'src/enums/ETypeProduct';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  MaxFileSizeValidator,
+  Param,
+  ParseFilePipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors
+} from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { fileStorage } from 'src/storage'
+import { IngredientDto } from './dto/ingredient.dto'
+import { IngredientService } from './ingredient.service'
 
 
 
