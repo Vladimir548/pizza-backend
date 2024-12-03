@@ -62,60 +62,49 @@ export class ProductService {
       categoryId: Number(id),
       productVariant: {
         some: {
-          AND: [
-            ...(params.sizes
-              ? [
-                  {
-                    sizes: {
-                      some: {
-                        sizeId: {
-                          in: params.sizes.map(Number),
-                        },
+          ...(params?.sizes || params?.priceTo || params?.priceFrom
+            ? {
+                sizes: {
+                  some: {
+                    ...(params?.sizes && {
+                      sizeId: {
+                        in: params?.sizes.map(Number),
                       },
-                    },
+                    }),
+                    ...(params?.priceTo || params?.priceFrom
+                      ? {
+                          price: {
+                            ...(params?.priceTo && { lte: Number(params.priceTo) }),
+                            ...(params?.priceFrom && { gte: Number(params.priceFrom) }),
+                          },
+                        }
+                      : {}),
                   },
-                ]
-              : []),
-            ...(params.dough
-              ? [
-                  {
-                    doughName: {
-                      in: params.dough,
-                    },
-                  },
-                ]
-              : []),
-            ...((params.priceTo || params.priceFrom)
-              ? [
-                  {
-                    sizes: {
-                      some: {
-                        price: {
-                          ...(params.priceTo && { lte: Number(params.priceTo) }),
-                          ...(params.priceFrom && { gte: Number(params.priceFrom) }),
-                        },
-                      },
-                    },
-                  },
-                ]
-              : []),
-          ],
+                },
+              }
+            : {}),
+          ...(params?.dough && {
+            doughName: {
+              in: params?.dough,
+            },
+          }),
         },
       },
-      ...(params.ingredients && {
-        ingredients:{
-          some:{
-            id:{
-              in:params.ingredients.map(Number)
-            }
-          }
-        }
-      })
+      ...(params?.ingredients && {
+        ingredients: {
+          some: {
+            id: {
+              in: params?.ingredients.map(Number),
+            },
+          },
+        },
+      }),
     };
-    console.log(JSON.stringify(where))
     return this.prisma.product.findMany({
         where,
+        
       include: {
+        ingredients:true,
         category: true,
         productVariant: {
           include: {
@@ -129,6 +118,7 @@ export class ProductService {
           },
         },
       },
+     
       
     });
   }
