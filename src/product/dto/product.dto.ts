@@ -1,5 +1,4 @@
-import { Category } from '@prisma/client';
-import { IsString,  IsOptional,IsInt,IsArray, IsEnum, IsNumber, isNumber } from 'class-validator'
+import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
 export enum StatusOrder {
   TRADITIONAL = "TRADITIONAL",
   THIN = "THIN",

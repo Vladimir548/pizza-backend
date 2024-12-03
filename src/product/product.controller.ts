@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete,HttpCode, ParseFilePipe, MaxFileSizeValidator, UploadedFile, UseInterceptors, Query } from '@nestjs/common';
-import { ProductService } from './product.service';
-import { ProductDto } from './dto/product.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { fileStorage } from 'src/storage';
+import { Body, Controller, Delete, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { ParamsDto } from 'src/params-dto'
+import { fileStorage } from 'src/storage'
+import { ProductDto } from './dto/product.dto'
+import { ProductService } from './product.service'
 
 
 @Controller('product')
@@ -37,8 +38,8 @@ export class ProductController {
   }
 	@HttpCode(200)
   @Get('category/:id')
-  findByCategory(@Param('id') id: string) {
-    return this.productService.findByCategory(+id);
+  findByCategory(@Param('id') id: string, @Query('params') params?: ParamsDto) {
+    return this.productService.findByCategory(+id,params);
   }
 	@HttpCode(200)
   @Get(':id')

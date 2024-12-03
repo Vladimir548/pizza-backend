@@ -1,6 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { ProductDto } from './dto/product.dto';
-import { PrismaService } from 'src/prisma.service';
+
+import { Injectable } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
+import { ParamsDto } from 'src/params-dto'
+import { PrismaService } from 'src/prisma.service'
+import { ProductDto } from './dto/product.dto'
 
 @Injectable()
 export class ProductService {
@@ -12,6 +15,9 @@ export class ProductService {
         categoryId: Number(dto.categoryId),
         image: dto.image,
         type: dto.type,
+        ingredients:{
+          connect:dto.ingredientIds?.map((id) => ({ id }))
+        }
       },
     });
   }
@@ -40,6 +46,7 @@ export class ProductService {
                 price: true,
               },
             },
+            
           },
         },
       },
@@ -50,11 +57,64 @@ export class ProductService {
     );
     return Math.max(...mathMax);
   }
-  findByCategory(id: number) {
-    return this.prisma.product.findMany({
-      where: {
-        categoryId: Number(id),
+  findByCategory(id: number,params?:ParamsDto) {
+    const where: Prisma.ProductWhereInput = {
+      categoryId: Number(id),
+      productVariant: {
+        some: {
+          AND: [
+            ...(params.sizes
+              ? [
+                  {
+                    sizes: {
+                      some: {
+                        sizeId: {
+                          in: params.sizes.map(Number),
+                        },
+                      },
+                    },
+                  },
+                ]
+              : []),
+            ...(params.dough
+              ? [
+                  {
+                    doughName: {
+                      in: params.dough,
+                    },
+                  },
+                ]
+              : []),
+            ...((params.priceTo || params.priceFrom)
+              ? [
+                  {
+                    sizes: {
+                      some: {
+                        price: {
+                          ...(params.priceTo && { lte: Number(params.priceTo) }),
+                          ...(params.priceFrom && { gte: Number(params.priceFrom) }),
+                        },
+                      },
+                    },
+                  },
+                ]
+              : []),
+          ],
+        },
       },
+      ...(params.ingredients && {
+        ingredients:{
+          some:{
+            id:{
+              in:params.ingredients.map(Number)
+            }
+          }
+        }
+      })
+    };
+    console.log(JSON.stringify(where))
+    return this.prisma.product.findMany({
+        where,
       include: {
         category: true,
         productVariant: {
@@ -63,11 +123,13 @@ export class ProductService {
               include: {
                 proportion: true,
                 ingredients: true,
+
               },
             },
           },
         },
       },
+      
     });
   }
   async search(query: string) {

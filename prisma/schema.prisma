@@ -42,7 +42,8 @@ model Product {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   image          String
-  descriprion    String?
+  description    String?
+  ingredients    Ingredient[]     @relation("ProductIngredients")
   CartItem       CartItem[]
   category       Category         @relation(fields: [categoryId], references: [id])
   categoryId     Int
@@ -107,6 +108,7 @@ model Ingredient {
   categories Category[] @relation("CategoryIngredients")
   cartItems  CartItem[] @relation("CartItemToIngredient")
   sizes      Sizes[]    @relation("IngredientToSizes")
+  product    Product[]  @relation("ProductIngredients")
 }
 
 model Cart {
