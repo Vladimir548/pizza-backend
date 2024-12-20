@@ -78,8 +78,8 @@ model SubProduct {
   variant         ProductVariant @relation(fields: [variantId], references: [id])
   parentVariantId Int
   parentVariant   ProductVariant @relation("ParentVariant", fields: [parentVariantId], references: [id])
-  size            Sizes          @relation(fields: [sizeId], references: [id])
-  sizeId          Int
+  size            Sizes          @relation(fields: [subSizeId], references: [id])
+  subSizeId       Int
   quantity        Int?
   isReplace       Boolean        @default(true)
   createdAt       DateTime       @default(now())

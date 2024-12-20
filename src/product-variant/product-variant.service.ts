@@ -11,7 +11,8 @@ export class ProductVariantService {
   ? JSON.parse(dto.productsSub) 
   : dto.productsSub;
 
-
+console.log('productsSub',productsSub);
+console.log('dto',dto);
     const calcPriceKit =await Promise.all(
       productsSub?.map(async (product) => {
         const priceProduct = await this.prisma.productVariant.findFirst({
@@ -55,24 +56,33 @@ export class ProductVariantService {
             },
           })),
         },
+        subProduct:{
+          create:productsSub.map((product) => ({
+            productId: Number(product.productId),
+            subSizeId: Number(product.sizeId),
+            variantId: Number(product.variantId),
+            isReplace: product.isReplace,
+            quantity: Number(product.quantity),
+          }))
+        },
         priceKit:totalPrice
       },
     });
 
-    await Promise.all(
-      productsSub.map(async (product) =>
-        this.prisma.subProduct.create({
-          data: {
-            productId: Number(product.productId),
-            sizeId: Number(product.sizeId),
-            parentVariantId: createdVariant.id,
-            variantId: Number(product.variantId),
-            isReplace: product.isReplace,
-            quantity: Number(product.quantity),
-          },
-        }),
-      ),
-    );
+    // await Promise.all(
+    //   productsSub.map(async (product) =>
+    //    await this.prisma.subProduct.create({
+    //       data: {
+    //         productId: Number(product.productId),
+    //         sizeId: Number(product.sizeId),
+    //         parentVariantId: createdVariant.id,
+    //         variantId: Number(product.variantId),
+    //         isReplace: product.isReplace,
+    //         quantity: Number(product.quantity),
+    //       },
+    //     }),
+    //   ),
+    // );
 
     const createAttribute = await this.prisma.productAttribute.create({
       data: {
@@ -86,6 +96,7 @@ export class ProductVariantService {
         subProduct: true, 
       },
     });
+    // console.log('variantWithSubProducts',variantWithSubProducts);
     return { variantWithSubProducts, createAttribute };
   }
 

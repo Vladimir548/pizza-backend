@@ -70,6 +70,7 @@ export class ProductService {
                 price: true,
               },
             },
+            priceKit:true
             
           },
         },
@@ -77,7 +78,7 @@ export class ProductService {
     });
 
     const mathMax = price?.flatMap((val) =>
-      val.productVariant.map((val) => val.sizes.map((val) => val.price)).flat(),
+      val.productVariant.map((val) => val.priceKit ? val.priceKit : val.sizes.map((val) => val.price)).flat(),
     );
     return Math.max(...mathMax);
   }
@@ -164,7 +165,6 @@ export class ProductService {
     });
   }
   async getProductsByIds(ids:number[]){
-    // const productIds = ids.map(id => ({id:Number(id)}))
     return await this.prisma.product.findMany({
       where:{
         id:{
@@ -198,7 +198,19 @@ export class ProductService {
               },
             },
 			      productAttribute:true,
-            subProduct:true
+            subProduct:{
+              include:{
+                product:true,
+                size:{
+                  include:{
+                    proportion:true,
+                    ingredients:true,
+                  }
+                },
+                variant:true
+
+              }
+            }
           },
             
         },
