@@ -28,19 +28,14 @@ export class CartService {
 						createdAt:'desc'
 					},
 					include:{
-						ingredients:true,
-						product:true,
-						productVariant:{
+						subCartItem:{
 							include:{
-								productAttribute:true,
+								ingredients:true,
+								product:true,
+								productVariant:true,
+								size:true
 							}
-						},
-						size:{
-							include:{
-								proportion:true
-							}
-						},
-
+						}
 					}
 				},
 				_count:true
@@ -65,9 +60,12 @@ export class CartService {
 			include:{
 				items:{
 					include:{
-						ingredients:true,
-						size:true,
-
+						subCartItem:{
+							include:{
+								ingredients:true,
+								size:true,
+							}
+						}
 					}
 				}
 			}
@@ -75,11 +73,17 @@ export class CartService {
 			let amountGoods = 0
 		for(const item of getAllItems.items){
 
-			const amountPriceIngredients = item.ingredients.reduce((acc,val) => Number(acc) + Number(val.price),0)
+			item.subCartItem.map(cartItem => {
+				const amountPriceIngredients = cartItem.ingredients.reduce((acc,val) =>
+					Number(acc) + Number(val.price),
+			 0)
+ 
+			 const totalPriceItem = (cartItem.size.price + amountPriceIngredients)*item.quantity	
+ 
+			 amountGoods  +=totalPriceItem
+		})
 
-			const totalPriceItem = (item.size.price + amountPriceIngredients)*item.quantity	
-
-			amountGoods  +=totalPriceItem
+			
 		}
 		const priceDelivery = getDeliveryPrice(amountGoods) ?? 0
 				const totalPrice= Number(amountGoods) + Number(priceDelivery)

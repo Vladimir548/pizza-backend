@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ParamsDto } from 'src/params-dto'
 import { fileStorage } from 'src/storage'
@@ -41,19 +41,22 @@ export class ProductController {
   findByCategory(@Param('id') id: string, @Query('params') params?: ParamsDto) {
     return this.productService.findByCategory(+id,params);
   }
+ 
+  @HttpCode(200)
+  @Get('sub-product')
+  findSubProduct() {
+    return this.productService.findAllSubProducts();
+  }
 	@HttpCode(200)
   @Get(':id')
   findId(@Param('id') id: string) {
+
     return this.productService.findId(+id);
   }
+	@HttpCode(200)
+  @Get('by-ids')
+  findIds(@Query('ids') ids: number[]) {
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: ProductDto) {
-    return this.productService.update(+id, dto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+    return this.productService.getProductsByIds(ids);
   }
 }

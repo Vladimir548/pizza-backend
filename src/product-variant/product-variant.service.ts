@@ -1,18 +1,49 @@
-import { Injectable } from '@nestjs/common';
-import { ProductVariantDto } from './dto/product-variant.dto';
-import { PrismaService } from 'src/prisma.service';
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from 'src/prisma.service'
+import { ProductVariantDto } from './dto/product-variant.dto'
 
 @Injectable()
 export class ProductVariantService {
   constructor(private prisma: PrismaService) {}
   async create(dto: ProductVariantDto) {
-	console.log(dto)
+    
+      const productsSub = typeof dto.productsSub === 'string' 
+  ? JSON.parse(dto.productsSub) 
+  : dto.productsSub;
+
+
+    const calcPriceKit =await Promise.all(
+      productsSub?.map(async (product) => {
+        const priceProduct = await this.prisma.productVariant.findFirst({
+          where:{
+                productId:+product.productId,
+                productAttribute:{
+                  productVariantId:+product.variantId
+                },
+                
+          },
+          select:{
+            sizes:{
+              where:{
+                sizeId:+product.sizeId
+              },
+              select:{
+                price:true
+              }
+            },
+          }
+        }) 
+        return Number(priceProduct.sizes[0].price) * dto.quantity
+      })
+       
+    )
+    const totalPrice = calcPriceKit.reduce((acc,val) => acc + val,0)
+
     const createdVariant = await this.prisma.productVariant.create({
       data: {
         productId: +dto.productId,
         parameterId: +dto.parameterId,
         quantity: +dto.quantity,
-        doughName: dto.doughName,
         image: dto.image,
         sizes: {
           create: dto.sizes?.map((size) => ({
@@ -20,12 +51,28 @@ export class ProductVariantService {
             weight: String(size.weight),
             sizeId: Number(size.sizeId),
             ingredients: {
-              connect: size.ingredientIds?.map((id) => ({ id })),
+              connect: size.ingredients?.map((id) => ({id: Number(id) })),
             },
           })),
         },
+        priceKit:totalPrice
       },
     });
+
+    await Promise.all(
+      productsSub.map(async (product) =>
+        this.prisma.subProduct.create({
+          data: {
+            productId: Number(product.productId),
+            sizeId: Number(product.sizeId),
+            parentVariantId: createdVariant.id,
+            variantId: Number(product.variantId),
+            isReplace: product.isReplace,
+            quantity: Number(product.quantity),
+          },
+        }),
+      ),
+    );
 
     const createAttribute = await this.prisma.productAttribute.create({
       data: {
@@ -33,8 +80,13 @@ export class ProductVariantService {
         productVariantId: createdVariant.id,
       },
     });
-
-    return { createdVariant, createAttribute };
+    const variantWithSubProducts = await this.prisma.productVariant.findUnique({
+      where: { id: createdVariant.id },
+      include: {
+        subProduct: true, 
+      },
+    });
+    return { variantWithSubProducts, createAttribute };
   }
 
   findAll() {

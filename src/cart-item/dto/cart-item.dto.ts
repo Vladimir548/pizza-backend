@@ -1,22 +1,25 @@
-import { IsString,  IsOptional,IsInt,IsArray, IsEnum, IsNumber } from 'class-validator'
+import { TypeProduct } from '@prisma/client'
+import { IsArray, IsEnum, IsInt, IsOptional } from 'class-validator'
 export enum StatusOrder {
   TRADITIONAL = "TRADITIONAL",
   THIN = "THIN",
 	
-}
-enum TypeProduct {
-  PIZZA="PIZZA",
-  DRINKS="DRINKS",
-  SNACKS="SNACKS",
-  DESSERTS="DESSERTS",
-  COMBO="COMBO",
-  SAUCES="SAUCES",
 }
 export class CartItemDto {
 	@IsInt()
   id: number;
 	@IsInt()
   cartId: number;
+	@IsEnum(TypeProduct)
+	typeProduct:TypeProduct
+  @IsInt()
+  @IsOptional()
+  quantity: number;
+	subCartItem:SubCartItemDto[]
+
+}
+
+class SubCartItemDto {
 	@IsInt()
   productId: number;
   @IsInt()
@@ -25,10 +28,7 @@ export class CartItemDto {
   sizeId: number;
 	@IsInt()
   quantity: number;
-	@IsEnum(TypeProduct)
-	typeProduct:TypeProduct
-	@IsOptional()
+  @IsOptional()
 	@IsArray()
   ingredientIds: number[];
-
 }

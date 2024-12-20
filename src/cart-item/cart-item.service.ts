@@ -13,33 +13,36 @@ export class CartItemService {
   ) {}
 
   async create(dto: CartItemDto) {
-    const ingredientsArray = dto.ingredientIds?.map(Number);
-    console.log(dto)
-    const existingItemsIngredients = await this.prisma.cartItem.findMany({
+    const existingItemsIngredients = await this.prisma.cartItem.findFirst({
       where: {
         cartId: Number(dto.cartId),
-        productVariantId: Number(dto.productVariantId),
-        sizeId: Number(dto.sizeId),
-        productId: Number(dto.productId),
+        typeProduct:dto.typeProduct,
+      
       },
-      include: {
-        ingredients: true,
-      },
+      include:{
+        subCartItem:{
+          include:{
+            ingredients:true
+          }
+        }
+      }
+     
     });
-    const matchIngredients = existingItemsIngredients.find(
-      (item) =>
-        JSON.stringify(
-          item.ingredients.map((ingredient) => ingredient.id).sort(),
-        ) === JSON.stringify(ingredientsArray.sort()),
-    );
-    if (matchIngredients) {
-      if (matchIngredients.quantity < 10) {
+    const matchSubCartItem = existingItemsIngredients?.subCartItem.find((item) => {
+      return (
+        item.productId === Number(item.productId) &&
+        item.productVariantId === Number(item.productVariantId) &&
+        item.sizeId === Number(item.sizeId) 
+      );
+    });
+    if (matchSubCartItem) {
+      if (matchSubCartItem.quantity < 10) {
         await this.prisma.cartItem.update({
           where: {
-            id: Number(matchIngredients.id),
+            id: Number(matchSubCartItem.id),
           },
           data: {
-            quantity: matchIngredients.quantity + 1,
+            quantity: matchSubCartItem.quantity + 1,
           },
         });
         await this.cart.updatePrice(dto.cartId);
@@ -52,16 +55,19 @@ export class CartItemService {
       const addCartItem = await this.prisma.cartItem.create({
         data: {
           cartId: Number(dto.cartId),
-          productVariantId: Number(dto.productVariantId),
-          sizeId: Number(dto.sizeId),
-          productId: Number(dto.productId),
-          quantity: 1,
-          ingredients: {
-            connect: ingredientsArray?.map((id) => ({ id })),
-          },
-        },
-        include: {
-          ingredients: true,
+          typeProduct:dto.typeProduct,
+          subCartItem:{
+            create:dto.subCartItem.map(item => ({
+              productId:item.productId,
+              productVariantId:item.productVariantId,
+              sizeId:item.sizeId,
+              quantity:item.quantity,
+
+              ingredients:{
+                connect:item.ingredientIds.map(id => ({id:Number(id)}))
+              },
+            }))
+          }
         },
       });
 
@@ -72,15 +78,15 @@ export class CartItemService {
     }
   }
 
-  async findAll() {
-    return await this.prisma.cartItem.findFirst({
-      where: {
-        productVariant: {
-          doughName: 'THIN',
-        },
-      },
-    });
-  }
+  // async findAll() {
+  //   return await this.prisma.cartItem.findFirst({
+  //     where: {
+  //       productVariant: {
+  //         doughName: 'THIN',
+  //       },
+  //     },
+  //   });
+  // }
 
   async AllItemById(id: number) {
     return await this.prisma.cartItem.findMany({
@@ -88,10 +94,14 @@ export class CartItemService {
         cartId: Number(id),
       },
       include: {
-        ingredients: true,
-        productVariant: true,
-        size: true,
-        product: true,
+       subCartItem:{
+        include:{
+          product:true,
+          size:true,
+          ingredients:true,
+          productVariant:true,
+        }
+       },
       },
     });
   }
@@ -135,26 +145,26 @@ export class CartItemService {
 
     return changeQuantity;
   }
-  async calcItemPrice(cartId: number) {
-    const cartItems = await this.prisma.cartItem.findMany({
-      where: {
-        cartId: Number(cartId),
-      },
-      include: {
-        productVariant: true,
-        size: true,
-        ingredients: true,
-      },
-    });
+  // async calcItemPrice(cartId: number) {
+  //   const cartItems = await this.prisma.cartItem.findMany({
+  //     where: {
+  //       cartId: Number(cartId),
+  //     },
+  //     include: {
+  //       productVariant: true,
+  //       size: true,
+  //       ingredients: true,
+  //     },
+  //   });
 
-    for (const item of cartItems) {
-      const totalPriceIngredient = item.ingredients.reduce(
-        (acc, val) => Number(acc) + Number(val),
-        0,
-      );
-      const totalPrice =
-        (item.size.price + totalPriceIngredient) * item.quantity;
-      return totalPrice;
-    }
-  }
+  //   for (const item of cartItems) {
+  //     const totalPriceIngredient = item.ingredients.reduce(
+  //       (acc, val) => Number(acc) + Number(val),
+  //       0,
+  //     );
+  //     const totalPrice =
+  //       (item.size.price + totalPriceIngredient) * item.quantity;
+  //     return totalPrice;
+  //   }
+  // }
 }

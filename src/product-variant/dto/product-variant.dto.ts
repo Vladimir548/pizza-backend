@@ -1,6 +1,6 @@
 
-import {  ProductAttribute, Proportions, TypeDough } from '@prisma/client';
-import { IsArray, IsEnum,  IsNumber, IsOptional, IsString  } from 'class-validator';
+import { Proportions, SubProduct } from '@prisma/client'
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator'
 class SizesDto {
 	@IsNumber()
 	sizeId:Proportions
@@ -11,7 +11,7 @@ class SizesDto {
 	@IsNumber()
   price: number;
 	@IsArray()
-  ingredientIds: number[];
+  ingredients: number[];
 }
 
 
@@ -19,8 +19,6 @@ export class ProductVariantDto {
   @IsOptional()
   @IsNumber()
   quantity?: number;
-	@IsEnum(TypeDough)
-	doughName:TypeDough
   @IsOptional()
   @IsNumber()
   parameterId?: number;
@@ -34,4 +32,11 @@ export class ProductVariantDto {
 	@IsString()
 	@IsOptional()
 	attributeName:string
+	@IsOptional()
+	@IsArray()
+  productsSub: SubProduct[];
+	@IsOptional()
+	@IsNumber() 
+	priceKit:number
+
 }

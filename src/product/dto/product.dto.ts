@@ -1,17 +1,6 @@
+import { TypeProduct } from '@prisma/client'
 import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
-export enum StatusOrder {
-  TRADITIONAL = "TRADITIONAL",
-  THIN = "THIN",
-	
-}
-enum TypeProduct {
-  PIZZA="PIZZA",
-  DRINKS="DRINKS",
-  SNACKS="SNACKS",
-  DESSERTS="DESSERTS",
-  COMBO="COMBO",
-  SAUCES="SAUCES",
-}
+
 export class ProductDto {
 	@IsString()
   name: string;
@@ -27,5 +16,8 @@ export class ProductDto {
 	@IsOptional()
 	@IsArray()
   ingredientIds: number[];
+  @IsNumber()
+  @IsOptional()
+  parentId:number;
 
 }
