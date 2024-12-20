@@ -1,6 +1,7 @@
 
 import { Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
+import { AllTypeWithSubProduct } from 'src/data'
 import { ParamsDto } from 'src/params-dto'
 import { PrismaService } from 'src/prisma.service'
 import { ProductDto } from './dto/product.dto'
@@ -16,8 +17,8 @@ export class ProductService {
         image: dto.image,
         type: dto.type,
         ingredients:{
-          connect:dto.ingredientIds?.map((id) => ({ id }))
-        }
+          connect:dto.ingredientIds?.map((id) => ({id: Number(id) }))
+        },
       },
     });
   }
@@ -33,6 +34,29 @@ export class ProductService {
       },
     });
   }
+
+ async findAllSubProducts (){
+    return await this.prisma.product.findMany({
+      where:{
+        type:{
+          notIn:AllTypeWithSubProduct
+        },
+      },
+      include:{
+        productVariant:{
+          include:{
+            sizes:{
+              include:{
+                proportion:true
+              }
+            },
+            productAttribute:true
+          }
+        },
+      }
+    })
+  };
+
   async findMaxPrice(categoryId:number) {
     const price = await this.prisma.product.findMany({
       where:{
@@ -83,9 +107,10 @@ export class ProductService {
                 },
               }
             : {}),
-          ...(params?.dough && {
-            doughName: {
-              in: params?.dough,
+          ...(params?.variant && {
+            productAttribute: {
+              productVariantId:params.variant
+              
             },
           }),
         },
@@ -102,7 +127,6 @@ export class ProductService {
     };
     return this.prisma.product.findMany({
         where,
-        
       include: {
         ingredients:true,
         category: true,
@@ -115,11 +139,10 @@ export class ProductService {
 
               },
             },
+            subProduct:true
           },
         },
       },
-     
-      
     });
   }
   async search(query: string) {
@@ -140,6 +163,24 @@ export class ProductService {
     	}, {} as Record<string, typeof products>);
     });
   }
+  async getProductsByIds(ids:number[]){
+    // const productIds = ids.map(id => ({id:Number(id)}))
+    return await this.prisma.product.findMany({
+      where:{
+        id:{
+          in:ids
+        }
+      },
+      include:{
+        productVariant:{
+          select:{
+            sizes:true,
+
+          }
+        }
+      }
+    })
+  }
   findId(id: number) {
     return this.prisma.product.findFirst({
       where: {
@@ -152,25 +193,19 @@ export class ProductService {
             sizes: {
               include: {
                 proportion: true,
-				ingredients:true,
+				    ingredients:true,
 
               },
             },
-			productAttribute:true
+			      productAttribute:true,
+            subProduct:true
           },
-
+            
         },
+        ingredients:true,
 
         category: true,
       },
     });
-  }
-
-  update(id: number, dto: ProductDto) {
-    return `This action updates a #${id} product`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} product`;
   }
 }
