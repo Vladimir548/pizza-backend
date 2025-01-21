@@ -6,7 +6,7 @@ export class ParamsDto {
 	ingredients:number[]
   priceFrom: number;
   priceTo: number;
-	variant:number
+	variant:number[]
 
  
 

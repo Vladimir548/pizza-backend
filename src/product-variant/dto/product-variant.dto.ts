@@ -3,7 +3,7 @@ import { Proportions, SubProduct } from '@prisma/client'
 import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator'
 class SizesDto {
 	@IsNumber()
-	sizeId:Proportions
+	proportionId:Proportions
 	@IsNumber()
 	productVariantId:number;  
 	@IsString()
@@ -13,7 +13,6 @@ class SizesDto {
 	@IsArray()
   ingredients: number[];
 }
-
 
 export class ProductVariantDto {
   @IsOptional()
@@ -29,14 +28,14 @@ export class ProductVariantDto {
   sizes?: SizesDto[];  
   @IsNumber()
   productId: number;
-	@IsString()
 	@IsOptional()
 	attributeName:string
 	@IsOptional()
 	@IsArray()
-  productsSub: SubProduct[];
+  subProduct: SubProduct[];
 	@IsOptional()
 	@IsNumber() 
 	priceKit:number
-
+	@IsNumber()
+  variantTypesId: number;
 }

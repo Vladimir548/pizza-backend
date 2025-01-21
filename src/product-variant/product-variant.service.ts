@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { SubProduct } from '@prisma/client'
 import { PrismaService } from 'src/prisma.service'
 import { ProductVariantDto } from './dto/product-variant.dto'
 
@@ -6,40 +7,38 @@ import { ProductVariantDto } from './dto/product-variant.dto'
 export class ProductVariantService {
   constructor(private prisma: PrismaService) {}
   async create(dto: ProductVariantDto) {
-    
-      const productsSub = typeof dto.productsSub === 'string' 
-  ? JSON.parse(dto.productsSub) 
-  : dto.productsSub;
-
-console.log('productsSub',productsSub);
-console.log('dto',dto);
-    const calcPriceKit =await Promise.all(
-      productsSub?.map(async (product) => {
+    const productsSub = typeof dto.subProduct === 'string' 
+      ? JSON.parse(dto.subProduct) 
+      : dto.subProduct;
+  
+      console.log('productsSub',productsSub)
+    const calcPriceKit = await Promise.all(
+      (Array.isArray(productsSub) ? productsSub : []).map(async (product) => {
         const priceProduct = await this.prisma.productVariant.findFirst({
-          where:{
-                productId:+product.productId,
-                productAttribute:{
-                  productVariantId:+product.variantId
-                },
-                
-          },
-          select:{
-            sizes:{
-              where:{
-                sizeId:+product.sizeId
-              },
-              select:{
-                price:true
-              }
+          where: {
+            productId: +product.productId,
+            productAttribute: {
+              productVariantId: +product.variantId,
             },
-          }
-        }) 
-        return Number(priceProduct.sizes[0].price) * dto.quantity
+          },
+          select: {
+            sizes: {
+              where: {
+                id: +product.subSizeId,
+              },
+              select: {
+                price: true,
+              },
+            },
+          },
+        });
+        console.log('price product',priceProduct)
+        return Number(priceProduct?.sizes?.[0]?.price || 0) * dto.quantity;
       })
-       
-    )
-    const totalPrice = calcPriceKit.reduce((acc,val) => acc + val,0)
-
+    );
+  
+    const totalPrice = calcPriceKit.reduce((acc, val) => acc + val, 0);
+  
     const createdVariant = await this.prisma.productVariant.create({
       data: {
         productId: +dto.productId,
@@ -47,57 +46,80 @@ console.log('dto',dto);
         quantity: +dto.quantity,
         image: dto.image,
         sizes: {
-          create: dto.sizes?.map((size) => ({
-            price: Number(size.price),
-            weight: String(size.weight),
-            sizeId: Number(size.sizeId),
-            ingredients: {
-              connect: size.ingredients?.map((id) => ({id: Number(id) })),
-            },
-          })),
+          create: Array.isArray(dto.sizes)
+            ? dto.sizes.map((size) => ({
+                price: Number(size.price),
+                weight: String(size.weight),
+                proportionId: Number(size.proportionId),
+                ingredients: {
+                  connect: Array.isArray(size.ingredients)
+                    ? size.ingredients.map((id) => ({ id: Number(id) }))
+                    : [],
+                },
+              }))
+            : [], 
         },
-        subProduct:{
-          create:productsSub.map((product) => ({
-            productId: Number(product.productId),
-            subSizeId: Number(product.sizeId),
-            variantId: Number(product.variantId),
-            isReplace: product.isReplace,
-            quantity: Number(product.quantity),
-          }))
+        subProduct: {
+          create: Array.isArray(productsSub)
+            ? productsSub.map((product: SubProduct) => ({
+                productId: Number(product.productId),
+                subSizeId: Number(product.subSizeId),
+                variantId: Number(product.variantId),
+                isReplace: product.isReplace,
+                quantity: Number(product.quantity),
+              }))
+            : [],
         },
-        priceKit:totalPrice
+        priceKit: totalPrice,
       },
     });
-
-    // await Promise.all(
-    //   productsSub.map(async (product) =>
-    //    await this.prisma.subProduct.create({
-    //       data: {
-    //         productId: Number(product.productId),
-    //         sizeId: Number(product.sizeId),
-    //         parentVariantId: createdVariant.id,
-    //         variantId: Number(product.variantId),
-    //         isReplace: product.isReplace,
-    //         quantity: Number(product.quantity),
-    //       },
-    //     }),
-    //   ),
-    // );
-
+  
     const createAttribute = await this.prisma.productAttribute.create({
       data: {
         name: dto?.attributeName,
         productVariantId: createdVariant.id,
+        variantTypesId: Number(dto.variantTypesId),
       },
     });
-    const variantWithSubProducts = await this.prisma.productVariant.findUnique({
-      where: { id: createdVariant.id },
-      include: {
-        subProduct: true, 
+  
+    return { createdVariant, createAttribute };
+  }
+  async findByVariantAndSizeProduct (params:{productId:number,variantId:number,sizeId:number}[]){
+    const products = await this.prisma.productVariant.findMany({
+      where:{
+        OR:params.map(product => ({
+          productAttribute:{
+            variantTypesId:Number(product.variantId),
+
+          },
+          Product:{
+            id:Number(product.productId)
+          }
+        }))
       },
-    });
-    // console.log('variantWithSubProducts',variantWithSubProducts);
-    return { variantWithSubProducts, createAttribute };
+        include:{
+            sizes:{
+              include:{
+                ingredients:true,
+                proportion:true
+              }
+            },
+            productAttribute:{
+              include:{
+                variantTypes:true,
+              }
+            },
+        }
+    })
+
+    const filteredProducts = products.map(product => ({
+      ...product,
+      sizes: product.sizes.filter(size =>
+        params.some(param => param.sizeId === size.proportionId)
+      ),
+    }));
+
+    return filteredProducts
   }
 
   findAll() {

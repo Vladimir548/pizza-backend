@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { TypeProduct } from '@prisma/client'
 import { ParamsDto } from 'src/params-dto'
 import { fileStorage } from 'src/storage'
 import { ProductDto } from './dto/product.dto'
@@ -41,22 +42,37 @@ export class ProductController {
   findByCategory(@Param('id') id: string, @Query('params') params?: ParamsDto) {
     return this.productService.findByCategory(+id,params);
   }
+	@HttpCode(200)
+  @Get('type/:type')
+  findByType(@Param('type') type: TypeProduct, ) {
+    return this.productService.findByType(type);
+  }
  
   @HttpCode(200)
   @Get('sub-product')
   findSubProduct() {
     return this.productService.findAllSubProducts();
   }
+  @HttpCode(200)
+  @Get('by-ids')
+  findIds(@Query('ids') ids: number[]) {
+    return this.productService.getProductsByIds(ids);
+  }
+	@HttpCode(200)
+  @Get('by-variant-and-size')
+   findByVariantAndSize(@Query('productData') productData: {productId:number,variantId:number,sizeId:number}[]) {
+    return  this.productService.findByVariantAndSizeProduct(productData);
+  }
+	@HttpCode(200)
+  @Get('list-by-size-variant')
+   getListBySizeAndVariant(@Query('params') params:{type:TypeProduct,size:number,variant:number}) {
+    return  this.productService.getListBySizeAndVariant(params);
+  }
 	@HttpCode(200)
   @Get(':id')
   findId(@Param('id') id: string) {
-
     return this.productService.findId(+id);
   }
-	@HttpCode(200)
-  @Get('by-ids')
-  findIds(@Query('ids') ids: number[]) {
+  
 
-    return this.productService.getProductsByIds(ids);
-  }
 }

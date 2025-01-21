@@ -1,6 +1,6 @@
 
 import { Injectable } from '@nestjs/common'
-import { Prisma } from '@prisma/client'
+import { Prisma, TypeProduct } from '@prisma/client'
 import { AllTypeWithSubProduct } from 'src/data'
 import { ParamsDto } from 'src/params-dto'
 import { PrismaService } from 'src/prisma.service'
@@ -82,36 +82,50 @@ export class ProductService {
     );
     return Math.max(...mathMax);
   }
-  findByCategory(id: number,params?:ParamsDto) {
+  
+  async findByCategory(id: number,params?:ParamsDto) {
     const where: Prisma.ProductWhereInput = {
       categoryId: Number(id),
       productVariant: {
         some: {
-          ...(params?.sizes || params?.priceTo || params?.priceFrom
-            ? {
-                sizes: {
-                  some: {
-                    ...(params?.sizes && {
-                      sizeId: {
-                        in: params?.sizes.map(Number),
-                      },
-                    }),
-                    ...(params?.priceTo || params?.priceFrom
-                      ? {
-                          price: {
-                            ...(params?.priceTo && { lte: Number(params.priceTo) }),
-                            ...(params?.priceFrom && { gte: Number(params.priceFrom) }),
-                          },
-                        }
-                      : {}),
-                  },
+          ...(params?.sizes && {
+            sizes: {
+              some: {
+                id: {
+                  in: params.sizes.map(Number),
                 },
+              },
+            },
+          }),
+          ...(params?.priceFrom || params?.priceTo
+            ? {
+                OR: [
+                  {
+                    sizes: {
+                      some: {
+                        price: {
+                          ...(params.priceTo && { lte: Number(params.priceTo) }),
+                          ...(params.priceFrom && { gte: Number(params.priceFrom) }),
+                        },
+                      },
+                    },
+                  },
+                  {
+                    priceKit: {
+                      ...(params.priceTo && { lte: Number(params.priceTo) }),
+                      ...(params.priceFrom && { gte: Number(params.priceFrom) }),
+                    },
+                  },
+                ],
               }
-            : {}),
+            : {}), 
           ...(params?.variant && {
             productAttribute: {
-              productVariantId:params.variant
-              
+              variantTypes: {
+                id: {
+                  in: params.variant.map(Number),
+                },
+              },
             },
           }),
         },
@@ -120,13 +134,14 @@ export class ProductService {
         ingredients: {
           some: {
             id: {
-              in: params?.ingredients.map(Number),
+              in: params.ingredients.map(Number),
             },
           },
         },
       }),
     };
-    return this.prisma.product.findMany({
+
+    return await this.prisma.product.findMany({
         where,
       include: {
         ingredients:true,
@@ -140,7 +155,12 @@ export class ProductService {
 
               },
             },
-            subProduct:true
+            subProduct:true,
+            productAttribute:{
+              include:{
+                variantTypes:true
+              }
+            }
           },
         },
       },
@@ -181,8 +201,9 @@ export class ProductService {
       }
     })
   }
-  findId(id: number) {
-    return this.prisma.product.findFirst({
+ async findId(id: number) {
+
+    return await this.prisma.product.findFirst({
       where: {
         id: +id,
       },
@@ -197,17 +218,42 @@ export class ProductService {
 
               },
             },
-			      productAttribute:true,
+			      productAttribute:{
+              include:{
+                variantTypes:true
+              }
+            },
             subProduct:{
               include:{
-                product:true,
+                product:{
+                  include:{
+                    productVariant:{
+                      include:{
+                        productAttribute:{
+                          include:{
+                            variantTypes:true
+                          }
+                        },
+                        sizes:true
+                      }
+                    }
+                  }
+                },
                 size:{
                   include:{
                     proportion:true,
                     ingredients:true,
                   }
                 },
-                variant:true
+                variant:{
+                  include:{
+                    productAttribute:{
+                      include:{
+                        variantTypes:true 
+                      }
+                    }
+                  }
+                }
 
               }
             }
@@ -219,5 +265,119 @@ export class ProductService {
         category: true,
       },
     });
+  }
+  async findByType(type: TypeProduct) {
+    return await this.prisma.product.findMany({
+      where:{
+        type: type,
+      },
+      include:{
+        productVariant:{
+          include:{
+            sizes:{
+              include:{
+                proportion:true
+              }
+            },
+            productAttribute:{
+              include:{
+                variantTypes:true
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+  async findByVariantAndSizeProduct (params:{productId:number,variantId:number,sizeId:number}[]){
+    const products = await this.prisma.product.findMany({
+      where:{
+        OR:params.map(product => ({
+          id:Number(product.productId),
+        
+        }))
+      },
+        include:{
+          productVariant:{
+          include:{
+            sizes:{
+              include:{
+                ingredients:true,
+                proportion:true
+              }
+            },
+            productAttribute:{
+              include:{
+                variantTypes:true,
+                
+              },
+            },
+
+          }
+        }
+        }
+     
+    })
+    const handleVariantId = (id:number) =>{
+      return params.some(param => param.variantId && Number(param.variantId) === id)
+    }
+    const handleSizeId = (id:number) =>{
+      return params.some(param => param.sizeId && Number(param.sizeId) === id)
+    }
+    const handleProductId = (id:number) =>{
+      return params.some(param => param.productId && Number(param.productId) === id)
+    }
+
+    const filteredProducts = products.map(product => ({
+      ...product,
+      productVariant: product.productVariant.filter(variant => handleVariantId(variant.id)
+        && variant.sizes.filter(size => handleSizeId(size.id) )
+        && handleProductId(variant.productId)
+      ),
+      
+    }));
+
+    return filteredProducts
+  }
+
+  async getListBySizeAndVariant (params:{type:TypeProduct,size:number,variant:number}){
+
+    return await this.prisma.product.findMany({
+      where:{
+        type:params.type,
+        productVariant:{
+          ...params.variant ? ({
+          some:{
+            productAttribute:{
+              variantTypesId:Number(params.variant)
+            }
+          }
+        }) : null,
+        some:{
+          sizes:{
+            some:{
+              proportionId:Number(params.size)
+            }
+          }
+        }
+        }
+      },
+      include:{
+        productVariant:{
+          include:{
+            sizes:{
+              include:{
+                proportion:true
+              }
+            },
+            productAttribute:{
+              include:{
+                variantTypes:true
+              }
+            }
+          }
+        }
+      }
+    })
   }
 }

@@ -1,10 +1,22 @@
-import { Controller, Post ,  UseInterceptors,
-  UploadedFile, ParseFilePipe,HttpCode,Param,Get,
-  MaxFileSizeValidator,Body,Patch,Delete, } from '@nestjs/common';
-import { ProductVariantService } from './product-variant.service';
-import { ProductVariantDto } from './dto/product-variant.dto';
-import {  FileInterceptor } from '@nestjs/platform-express';
-import { fileStorage } from 'src/storage';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  MaxFileSizeValidator,
+  Param,
+  ParseFilePipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { fileStorage } from 'src/storage'
+import { ProductVariantDto } from './dto/product-variant.dto'
+import { ProductVariantService } from './product-variant.service'
 
 
 @Controller('product-variant')
@@ -32,9 +44,15 @@ export class ProductVariantController {
   findAll() {
     return this.productVariantService.findAll();
   }
+   @HttpCode(200)
+   @Get('by-variant-and-size')
+    findByVariantAndSize(@Query('productData') productData: {productId:number,variantId:number,sizeId:number}[]) {
+     return  this.productVariantService.findByVariantAndSizeProduct(productData);
+   } 
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+
     return this.productVariantService.findOne(+id);
   }
 

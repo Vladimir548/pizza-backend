@@ -15,20 +15,33 @@ export class CartItemDto {
   @IsInt()
   @IsOptional()
   quantity: number;
-	subCartItem:SubCartItemDto[]
-
-}
-
-class SubCartItemDto {
-	@IsInt()
+  @IsInt()
   productId: number;
   @IsInt()
   productVariantId: number;
 	@IsInt()
   sizeId: number;
-	@IsInt()
-  quantity: number;
   @IsOptional()
 	@IsArray()
   ingredientIds: number[];
+  @IsOptional()
+	@IsArray()
+  customSubProduct:CartSubProduct[]
 }
+export class CartSubProduct {
+	@IsInt()
+  subProductId: number;
+  @IsInt()
+  variantId: number;
+	@IsInt()
+  sizeId: number;
+	@IsInt()
+  @IsOptional()
+  cartItemId?: number;
+	@IsInt()
+  index: number;
+}
+
+
+
+

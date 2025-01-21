@@ -14,9 +14,10 @@ import { CartModule } from './cart/cart.module';
 import { CartItemModule } from './cart-item/cart-item.module';
 import { OrderModule } from './order/order.module';
 import { ProportionModule } from './proportion/proportion.module';
+import { VariantTypesModule } from './variant-types/variant-types.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal:true}),CategoryModule, IngredientModule, ProductModule, ProductVariantModule, ParameterModule, UsersModule, AuthModule, CartModule, CartItemModule, OrderModule, ProportionModule],
+  imports: [ConfigModule.forRoot({isGlobal:true}),CategoryModule, IngredientModule, ProductModule, ProductVariantModule, ParameterModule, UsersModule, AuthModule, CartModule, CartItemModule, OrderModule, ProportionModule, VariantTypesModule],
   controllers: [AppController],
   providers: [AppService],
 })
