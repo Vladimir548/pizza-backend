@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 
-import { Prisma, TypeProduct } from '@prisma/client'
+import { Prisma, TypeProduct } from 'prisma/__generated__'
 import { AllTypeWithSubProduct } from 'src/data'
-import { PrismaService } from 'src/prisma.service'
+import { PrismaService } from 'src/prisma/prisma.service'
 import { getDeliveryPrice } from './delivery-price'
 type CartItem = Prisma.CartItemGetPayload<{
   include: {
@@ -26,7 +26,6 @@ type CartItem = Prisma.CartItemGetPayload<{
   };
 }>;
 
-// Тип для корзины (cart)
 type CartWithItems = Prisma.CartGetPayload<{
   include: {
     items: {
@@ -215,7 +214,6 @@ export class CartService {
 							amountGoods += calculateProductPrice(item);
 					}
 			});
-	
 			return amountGoods;
 	}
 

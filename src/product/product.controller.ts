@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { TypeProduct } from '@prisma/client'
+import { TypeProduct } from 'prisma/__generated__'
 import { ParamsDto } from 'src/params-dto'
 import { fileStorage } from 'src/storage'
 import { ProductDto } from './dto/product.dto'
@@ -65,7 +65,8 @@ export class ProductController {
   }
 	@HttpCode(200)
   @Get('list-by-size-variant')
-   getListBySizeAndVariant(@Query('params') params:{type:TypeProduct,size:number,variant:number}) {
+   getListBySizeAndVariant(@Param('params') params:{type:TypeProduct,size:number,variant:number}) {
+    console.log('product controller', params)
     return  this.productService.getListBySizeAndVariant(params);
   }
 	@HttpCode(200)

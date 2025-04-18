@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { ParameterDto } from './dto/parameter.dto';
+import { Injectable } from '@nestjs/common'
+import { ParameterDto } from './dto/parameter.dto'
 
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service'
 
 
 @Injectable()

@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query } from '@nestjs/common'
-import { TypeProduct } from '@prisma/client'
-import { VariantTypeDto } from './dto/variant-type.dto'
-import { VariantTypesService } from './variant-types.service'
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
+
+import { TypeProduct } from 'prisma/__generated__';
+import { VariantTypeDto } from './dto/variant-type.dto';
+import { VariantTypesService } from './variant-types.service';
 
 @Controller('variant-types')
 export class VariantTypesController {

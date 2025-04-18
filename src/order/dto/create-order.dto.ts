@@ -1,11 +1,15 @@
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from 'prisma/__generated__'
+
 
 type CartItemJson = {
   cartId: number;
-  productVariantId: number;
-  productId: number;
-  sizeId: number;
+  productVariant: string;
+	productVariantName:string;
+  product: string;
+  size: string;
   quantity: number;
+	ingredients?:string
+	weight?:number
   createdAt: Date;
   updatedAt: Date;
 };

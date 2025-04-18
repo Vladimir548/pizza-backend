@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
-import { ParameterService } from './parameter.service';
-import { ParameterController } from './parameter.controller';
-import { PrismaService } from 'src/prisma.service';
+import { Module } from '@nestjs/common'
+import { PrismaService } from 'src/prisma/prisma.service'
+import { ParameterController } from './parameter.controller'
+import { ParameterService } from './parameter.service'
 
 @Module({
   controllers: [ParameterController],

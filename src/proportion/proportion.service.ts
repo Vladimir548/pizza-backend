@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { ProportionDto } from './dto/proportion.dto';
-import { UpdateProportionDto } from './dto/update-proportion.dto';
-import { PrismaService } from 'src/prisma.service';
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from 'src/prisma/prisma.service'
+import { ProportionDto } from './dto/proportion.dto'
 
 
 @Injectable()
@@ -20,8 +19,12 @@ export class ProportionService {
 		})
   }
 
-  findAll() {
-    return `This action returns all proportion`;
+  async findAll()  {
+    return await this.prisma.proportions.findMany({
+      include:{
+        categories:true
+      }
+    })
   }
 
    async byType(categoryId: number) {
@@ -39,8 +42,20 @@ export class ProportionService {
     });
   }
 
-  update(id: number, updateProportionDto: UpdateProportionDto) {
-    return `This action updates a #${id} proportion`;
+ async update(id: number, dto: ProportionDto) {
+  console.log(dto)
+    return await this.prisma.proportions.update({
+      where:{
+        id:Number(id)
+      },
+      data:{
+        categories:{
+          connect:dto.categories?.map(id => ({id}))
+      },
+     value:dto.value
+
+      }
+    })
   }
 
   remove(id: number) {

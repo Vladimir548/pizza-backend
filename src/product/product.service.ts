@@ -1,9 +1,10 @@
 
 import { Injectable } from '@nestjs/common'
-import { Prisma, TypeProduct } from '@prisma/client'
+
+import { Prisma, TypeProduct } from 'prisma/__generated__'
 import { AllTypeWithSubProduct } from 'src/data'
 import { ParamsDto } from 'src/params-dto'
-import { PrismaService } from 'src/prisma.service'
+import { PrismaService } from 'src/prisma/prisma.service'
 import { ProductDto } from './dto/product.dto'
 
 @Injectable()
@@ -99,26 +100,24 @@ export class ProductService {
           }),
           ...(params?.priceFrom || params?.priceTo
             ? {
-                OR: [
-                  {
-                    sizes: {
-                      some: {
-                        price: {
-                          ...(params.priceTo && { lte: Number(params.priceTo) }),
-                          ...(params.priceFrom && { gte: Number(params.priceFrom) }),
-                        },
-                      },
-                    },
-                  },
-                  {
-                    priceKit: {
+                sizes: {
+                  some: {
+                    price: {
                       ...(params.priceTo && { lte: Number(params.priceTo) }),
                       ...(params.priceFrom && { gte: Number(params.priceFrom) }),
                     },
                   },
-                ],
+                },
               }
-            : {}), 
+            : {}),
+          ...(params?.priceFrom || params?.priceTo
+            ? {
+                priceKit: {
+                  ...(params.priceTo && { lte: Number(params.priceTo) }),
+                  ...(params.priceFrom && { gte: Number(params.priceFrom) }),
+                },
+              }
+            : {}),
           ...(params?.variant && {
             productAttribute: {
               variantTypes: {
@@ -341,7 +340,7 @@ export class ProductService {
   }
 
   async getListBySizeAndVariant (params:{type:TypeProduct,size:number,variant:number}){
-
+    console.log(params)
     return await this.prisma.product.findMany({
       where:{
         type:params.type,

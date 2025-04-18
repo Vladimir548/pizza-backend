@@ -1,25 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { OrderService } from './order.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
+import { Authorization } from 'src/auth/decorators/auth.decorator'
+import { Authorized } from 'src/auth/decorators/authorized.decorator'
+import { CreateOrderDto } from './dto/create-order.dto'
+import { UpdateOrderDto } from './dto/update-order.dto'
+import { OrderService } from './order.service'
 
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
-
+ @Authorization()
   @Post('create')
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+  create(@Body() createOrderDto: CreateOrderDto,@Authorized('id') userId: number) {
+    return this.orderService.create(createOrderDto,userId);
   }
 
   @Get()
   findAll() {
     return this.orderService.findAll();
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(+id);
+  @Authorization()
+  @Get('user')
+  findId(@Authorized('id') userId: number) {
+    return this.orderService.findId(userId);
   }
 
   @Patch(':id')

@@ -1,5 +1,6 @@
-import { TypeProduct } from '@prisma/client';
-import { IsEnum, IsString, } from 'class-validator'
+
+import { IsEnum, IsString, } from 'class-validator';
+import { TypeProduct } from 'prisma/__generated__';
 
 export class CategoryDto {
 	@IsString()

@@ -1,69 +1,91 @@
-import { CartService } from 'src/cart/cart.service';
 import {
-	Controller,
-	Post,
-	Body,
-	ParseIntPipe,
-	Res,
-	UseGuards,
-	Get,
-	Req,
-} from "@nestjs/common"
-import { AuthService } from './auth.service';
-import { RegisterDto } from "./dto/register-dto";
-import { Response } from "express";
-import { AuthGuard } from "@nestjs/passport";
-import { CurrentUser } from "./utils/decorators/current-user";
-import { GoogleGuard } from "./guards/google.guard";
-import { Profile } from "passport-google-oauth20"
-
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { Recaptcha } from '@nestlab/google-recaptcha'
+import { Request, Response } from 'express'
+import { AuthService } from './auth.service'
+import { LoginDto } from './dto/login.dto'
+import { RegisterDto } from './dto/register.dto'
+import { AuthProviderGuard } from './guards/provider.guard'
+import { ProviderService } from './provider/provider.service'
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService,
-							private readonly cartService:CartService
-	) {}
-	
-	@Post("register")
-	async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
-		return await this.authService.register(dto, res)
-	}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+    private readonly providerService: ProviderService,
+  ) {}
 
-	@UseGuards(AuthGuard("local"))
-	@Post("login")
-	async login(
-		@CurrentUser("id", ParseIntPipe) userId: number,
-		
-		@Res({ passthrough: true }) res: Response
-	) {
-		const getCartId = await this.cartService.findOne(userId)
-		return await this.authService.generateTokens(userId, res,getCartId.id)
-	}
+  @Recaptcha()
+  @Post('register')
+  @HttpCode(HttpStatus.OK)
+  public async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
+  }
 
-	@UseGuards(AuthGuard("jwt-refresh"))
-	@Post("refresh")
-	async refresh(
-		@CurrentUser("id", ParseIntPipe) userId: number,
-		@Res({ passthrough: true }) res: Response
-	) {
-		const getCartId = await this.cartService.findOne(userId)
-		return await this.authService.generateTokens(userId, res,getCartId.id)
-	}
+  @Recaptcha()
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  public async login(@Req() req: Request, @Body() dto: LoginDto) {
+    return this.authService.login(req, dto);
+  }
 
-	@Post("logout")
-	async logout(@Res({ passthrough: true }) res: Response) {
-		res.cookie("refreshToken", "")
-	}
-	@UseGuards(GoogleGuard)
-	@Get("google")
-	google() {}
+  @Post('login/two-factor')
+  @HttpCode(HttpStatus.OK)
+  public async twoFactor(
+    @Req() req: Request,
+    @Body() dto: { code: string; id: number },
+  ) {
+    return this.authService.twoFactor(req, dto);
+  }
 
-	@UseGuards(GoogleGuard)
-	@Get("google/callback")
-	async googleCallback(
-		@Req() req: Request & { user: Profile },
-		@Res({ passthrough: true }) res: Response
-	) {
-		return await this.authService.googleAuth(req.user._json.email,req.user.provider, res)
-	}
+  @UseGuards(AuthProviderGuard)
+  @Get('/oauth/callback/:provider')
+  public async callback(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Query('code') code: string,
+    @Param('provider') provider: string,
+  ) {
+    if (!code) {
+      throw new BadRequestException('Не был предоставлен код авторизации.');
+    }
+
+    await this.authService.extractProfileFromCode(req, provider, code);
+
+    return res.redirect(
+      `${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/dashboard/settings`,
+    );
+  }
+
+  @UseGuards(AuthProviderGuard)
+  @Get('/oauth/connect/:provider')
+  public async connect(@Param('provider') provider: string) {
+    const providerInstance = this.providerService.findByService(provider);
+
+    return {
+      url: providerInstance.getAuthUrl(),
+    };
+  }
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  public async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.logout(req, res);
+  }
 }

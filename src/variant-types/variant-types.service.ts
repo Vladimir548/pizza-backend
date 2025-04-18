@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { TypeProduct } from '@prisma/client'
-import { PrismaService } from 'src/prisma.service'
+
+import { TypeProduct } from 'prisma/__generated__'
+
+import { PrismaService } from 'src/prisma/prisma.service'
 import { VariantTypeDto } from './dto/variant-type.dto'
 
 @Injectable()

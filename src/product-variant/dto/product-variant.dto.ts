@@ -1,6 +1,5 @@
-
-import { Proportions, SubProduct } from '@prisma/client'
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
+import { Proportions, SubProduct, TypeProduct } from 'prisma/__generated__'
 class SizesDto {
 	@IsNumber()
 	proportionId:Proportions
@@ -16,26 +15,26 @@ class SizesDto {
 
 export class ProductVariantDto {
   @IsOptional()
-  @IsNumber()
+
   quantity?: number;
   @IsOptional()
-  @IsNumber()
   parameterId?: number;
-	@IsString()
+
   image: string;  
   @IsOptional()
-  @IsArray()
   sizes?: SizesDto[];  
-  @IsNumber()
+
   productId: number;
 	@IsOptional()
 	attributeName:string
 	@IsOptional()
-	@IsArray()
+
   subProduct: SubProduct[];
 	@IsOptional()
 	@IsNumber() 
 	priceKit:number
-	@IsNumber()
   variantTypesId: number;
+	@IsEnum(TypeProduct)
+	@IsOptional()
+  parentType?:TypeProduct ;
 }

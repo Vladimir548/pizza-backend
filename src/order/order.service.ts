@@ -1,14 +1,20 @@
-import { Injectable } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { PrismaService } from 'src/prisma.service';
-import { OrderStatus } from '@prisma/client';
+import { Injectable } from '@nestjs/common'
+import { OrderStatus } from 'prisma/__generated__'
+import { CartItemService } from 'src/cart-item/cart-item.service'
+import { PrismaService } from 'src/prisma/prisma.service'
+import { CreateOrderDto } from './dto/create-order.dto'
+import { UpdateOrderDto } from './dto/update-order.dto'
+
 
 @Injectable()
 export class OrderService {
-	constructor (private readonly prisma:PrismaService){}
- async create(dto: CreateOrderDto) {
-    return await this.prisma.order.create({
+	constructor (
+    private readonly prisma:PrismaService,
+    private readonly cartItem:CartItemService
+
+  ){}
+ async create(dto: CreateOrderDto,userId:number) {
+    await this.prisma.order.create({
 			data:{
 				address:dto.address,
 				email:dto.email,
@@ -16,20 +22,28 @@ export class OrderService {
 				phone:dto.phone.toString(),
 				status:OrderStatus.PENDING,
 				totalAmount:dto.totalAmount,
-				comment:dto.comment,
+				comment:dto.comment ?? null,
 				items:dto.items,
-				lastName:dto.lastName,
-				userId:dto.userId
+				userId:userId,
 			}
 		})
+
+    await this.cartItem.clear(userId)
   }
 
   findAll() {
     return `This action returns all order`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async findId(id: number) {
+    return await this.prisma.order.findMany({
+      where:{
+        userId:Number(id)
+      }, 
+      orderBy:{
+        createdAt:'desc'
+      }
+    })
   }
 
   update(id: number, updateOrderDto: UpdateOrderDto) {

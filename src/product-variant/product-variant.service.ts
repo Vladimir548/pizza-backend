@@ -1,18 +1,21 @@
-import { Injectable } from '@nestjs/common'
-import { SubProduct } from '@prisma/client'
-import { PrismaService } from 'src/prisma.service'
+import { ConflictException, Injectable } from '@nestjs/common'
+
+import { SubProduct, TypeProduct } from 'prisma/__generated__'
+import { PrismaService } from 'src/prisma/prisma.service'
 import { ProductVariantDto } from './dto/product-variant.dto'
 
 @Injectable()
 export class ProductVariantService {
   constructor(private prisma: PrismaService) {}
   async create(dto: ProductVariantDto) {
-    const productsSub = typeof dto.subProduct === 'string' 
-      ? JSON.parse(dto.subProduct) 
+    const productsSub = typeof dto.subProduct === 'string'
+      ? JSON.parse(dto.subProduct)
       : dto.subProduct;
-  
-      console.log('productsSub',productsSub)
-    const calcPriceKit = await Promise.all(
+
+    let totalPriceKit = 0
+
+    if(productsSub) {
+    const calcSubProduct = await Promise.all(
       (Array.isArray(productsSub) ? productsSub : []).map(async (product) => {
         const priceProduct = await this.prisma.productVariant.findFirst({
           where: {
@@ -32,13 +35,55 @@ export class ProductVariantService {
             },
           },
         });
-        console.log('price product',priceProduct)
         return Number(priceProduct?.sizes?.[0]?.price || 0) * dto.quantity;
       })
-    );
-  
-    const totalPrice = calcPriceKit.reduce((acc, val) => acc + val, 0);
-  
+    )
+    totalPriceKit = calcSubProduct.reduce((acc, val) => acc + val, 0);
+  }
+
+    if(dto.parentType === TypeProduct.PIZZA_HALF) {
+      const minPrice = await this.prisma.productVariant.findMany({
+        include:{
+          sizes:{
+            orderBy:{
+              price:'asc'
+            },
+            take:1
+          },
+        },
+        take:2
+      });
+
+      totalPriceKit = minPrice.reduce((acc,val) => {
+          return acc + (val.sizes[0].price / 2)
+        },0)
+    }
+
+    const findProduct =  await this.prisma.productVariant.findFirst({
+      where:{
+        Product:{
+          image:dto.image
+        },
+        productId:+dto.productId,
+        productAttribute:{
+          variantTypesId:Number(dto.variantTypesId),
+          name:dto.attributeName
+        },
+        
+        sizes:{
+         some:{
+          proportionId:{
+            in:dto.sizes.map(size => Number(size.proportionId))
+          }
+         }
+        }
+      }
+    })
+
+    if(findProduct) {
+      throw new ConflictException("Продукт с такими параметрами уже существует!");
+    }
+
     const createdVariant = await this.prisma.productVariant.create({
       data: {
         productId: +dto.productId,
@@ -57,7 +102,7 @@ export class ProductVariantService {
                     : [],
                 },
               }))
-            : [], 
+            : [],
         },
         subProduct: {
           create: Array.isArray(productsSub)
@@ -70,10 +115,10 @@ export class ProductVariantService {
               }))
             : [],
         },
-        priceKit: totalPrice,
+        priceKit: totalPriceKit,
       },
     });
-  
+
     const createAttribute = await this.prisma.productAttribute.create({
       data: {
         name: dto?.attributeName,
@@ -81,7 +126,7 @@ export class ProductVariantService {
         variantTypesId: Number(dto.variantTypesId),
       },
     });
-  
+
     return { createdVariant, createAttribute };
   }
   async findByVariantAndSizeProduct (params:{productId:number,variantId:number,sizeId:number}[]){

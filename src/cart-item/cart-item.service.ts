@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { CartService } from 'src/cart/cart.service'
 import { AllTypeWithSubProduct } from 'src/data'
-import { PrismaService } from 'src/prisma.service'
+import { PrismaService } from 'src/prisma/prisma.service'
 import { CartItemDto } from './dto/cart-item.dto'
 
 @Injectable()
@@ -54,6 +54,7 @@ export class CartItemService {
      (product.productId === dto.productId && product.productVariantId === dto.productVariantId && JsonProduct === JsonDto)
     )
     } )
+
     if (isProduct) {
       if (getQuantity < 10) {
         await this.prisma.cartItem.update({
@@ -69,8 +70,8 @@ export class CartItemService {
       const addCartItem = await this.prisma.cartItem.create({
         data: {
           cartId: Number(dto.cartId),
-          productVariantId: Number(dto.productVariantId),
-          sizeId: Number(dto.sizeId),
+          productVariantId:dto.productVariantId ? Number(dto.productVariantId) : null,
+          sizeId: dto.sizeId ? Number(dto.sizeId) : null,
           productId: Number(dto.productId),
           quantity: 1,
           ingredients: {
@@ -82,6 +83,7 @@ export class CartItemService {
         },
       });
     
+      console.log(' dto.customSubProduct', dto.customSubProduct)
       const createSubProduct = await Promise.all(
         dto.customSubProduct.map(product =>
           this.prisma.cartSubProduct.create({
@@ -188,26 +190,21 @@ export class CartItemService {
 
     return changeQuantity;
   }
-  // async calcItemPrice(cartId: number) {
-  //   const cartItems = await this.prisma.cartItem.findMany({
-  //     where: {
-  //       cartId: Number(cartId),
-  //     },
-  //     include: {
-  //       productVariant: true,
-  //       size: true,
-  //       ingredients: true,
-  //     },
-  //   });
+  async clear(userId: number) {
+    const getCartId = await this.prisma.cart.findUnique({
+      where:{
+        userId:Number(userId)
+      },
+      select:{
+        id:true
+      }
+    })
 
-  //   for (const item of cartItems) {
-  //     const totalPriceIngredient = item.ingredients.reduce(
-  //       (acc, val) => Number(acc) + Number(val),
-  //       0,
-  //     );
-  //     const totalPrice =
-  //       (item.size.price + totalPriceIngredient) * item.quantity;
-  //     return totalPrice;
-  //   }
-  // }
+		 await this.prisma.cartItem.deleteMany({
+			where:{
+				cartId:Number(getCartId.id)
+			},
+		})
+    await this.cart.updatePrice(getCartId.id);
+	}
 }

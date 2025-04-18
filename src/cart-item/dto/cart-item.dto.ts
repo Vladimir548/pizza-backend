@@ -1,25 +1,25 @@
-import { TypeProduct } from '@prisma/client'
-import { IsArray, IsEnum, IsInt, IsOptional } from 'class-validator'
+
+import { IsArray, IsInt, IsOptional } from 'class-validator'
+import { TypeProduct } from 'prisma/__generated__'
 export enum StatusOrder {
   TRADITIONAL = "TRADITIONAL",
   THIN = "THIN",
 	
 }
 export class CartItemDto {
-	@IsInt()
   id: number;
 	@IsInt()
   cartId: number;
-	@IsEnum(TypeProduct)
+
 	typeProduct:TypeProduct
   @IsInt()
   @IsOptional()
   quantity: number;
-  @IsInt()
+
   productId: number;
-  @IsInt()
+
   productVariantId: number;
-	@IsInt()
+
   sizeId: number;
   @IsOptional()
 	@IsArray()

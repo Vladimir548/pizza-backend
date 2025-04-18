@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { CartItemService } from './cart-item.service';
-import { CartItemController } from './cart-item.controller';
-import { PrismaService } from 'src/prisma.service';
-import { CartModule } from 'src/cart/cart.module';
-import { IngredientModule } from 'src/ingredient/ingredient.module';
+import { Module } from '@nestjs/common'
+import { CartModule } from 'src/cart/cart.module'
+import { IngredientModule } from 'src/ingredient/ingredient.module'
+import { PrismaService } from 'src/prisma/prisma.service'
+import { CartItemController } from './cart-item.controller'
+import { CartItemService } from './cart-item.service'
 
 
 @Module({
