@@ -40,29 +40,10 @@ export class ProductVariantController {
   return this.productVariantService.create(dto);
 }
 
-  @Get()
-  findAll() {
-    return this.productVariantService.findAll();
-  }
    @HttpCode(200)
    @Get('by-variant-and-size')
     findByVariantAndSize(@Query('productData') productData: {productId:number,variantId:number,sizeId:number}[]) {
      return  this.productVariantService.findByVariantAndSizeProduct(productData);
    } 
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-
-    return this.productVariantService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: ProductVariantDto) {
-    return this.productVariantService.update(+id, dto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productVariantService.remove(+id);
-  }
 }

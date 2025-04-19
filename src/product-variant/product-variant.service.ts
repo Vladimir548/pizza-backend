@@ -35,7 +35,7 @@ export class ProductVariantService {
             },
           },
         });
-        return Number(priceProduct?.sizes?.[0]?.price || 0) * dto.quantity;
+        return Number(priceProduct?.sizes?.[0]?.price || 0) * product.quantity;
       })
     )
     totalPriceKit = calcSubProduct.reduce((acc, val) => acc + val, 0);
@@ -167,19 +167,4 @@ export class ProductVariantService {
     return filteredProducts
   }
 
-  findAll() {
-    return `This action returns all productVariant`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} productVariant`;
-  }
-
-  update(id: number, dto: ProductVariantDto) {
-    return `This action updates a #${id} productVariant`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} productVariant`;
-  }
 }

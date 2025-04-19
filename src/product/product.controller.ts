@@ -65,9 +65,9 @@ export class ProductController {
   }
 	@HttpCode(200)
   @Get('list-by-size-variant')
-   getListBySizeAndVariant(@Param('params') params:{type:TypeProduct,size:number,variant:number}) {
+   getListBySizeAndVariant(@Query() params:{type:TypeProduct,size:number,variant:number}) {
     console.log('product controller', params)
-    return  this.productService.getListBySizeAndVariant(params);
+    return this.productService.getListBySizeAndVariant(params);
   }
 	@HttpCode(200)
   @Get(':id')
